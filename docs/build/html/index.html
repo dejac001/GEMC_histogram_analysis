@@ -1,0 +1,802 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Welcome to GEMC_histogram_analysis’s documentation! &#8212; GEMC_histogram_analysis v5 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="welcome-to-gemc-histogram-analysis-s-documentation">
+<h1>Welcome to GEMC_histogram_analysis’s documentation!<a class="headerlink" href="#welcome-to-gemc-histogram-analysis-s-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+</div>
+<div class="section" id="gemc-histogram-analysis">
+<h1>GEMC_histogram_analysis<a class="headerlink" href="#gemc-histogram-analysis" title="Permalink to this headline">¶</a></h1>
+<p>An analysis package utilizing histograms to calculate accurate
+vapor and liquid coexistence densities, saturated vapor pressure,
+and compressibility factor from a Gibbs ensemble Monte Carlo trajectory
+for unary vapor–liquid equilibria near the critical point.</p>
+</div>
+<div class="section" id="citation">
+<h1>Citation<a class="headerlink" href="#citation" title="Permalink to this headline">¶</a></h1>
+<p>Users of this package should cite:</p>
+<p>B.L. Eggimann, Y.Z.S. Sun, R.F. DeJaco, R. Singh, M. Ahsan, T.R. Josephson, and J.I. Siepmann. Assessing the quality of molecular simulations for vapor–liquid equilibria: An analysis of the TraPPE database. <em>J. Chem. Eng. Data</em>, submitted for publication on 7/22/2019.</p>
+</div>
+<div class="section" id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<p>This program is intended to be used on python3.X. It won’t work on python2.X
+because it uses new types of importing that are only available in python3.X.
+The python packages can be installed by the usual route like</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install requirements.txt
+</pre></div>
+</div>
+<p>but use of a virtualenvironment
+or a conda environment is recommended. If the user is unfamiliar with
+these approaches, the necessary packages will come with almost
+all anaconda python installations which are available on supercomputers.</p>
+<p>To test your installation of the program, look through the
+functions in <cite>examples.py</cite> and run one of the examples.</p>
+<p>GEMC_histogram_analysis runs on Python 3.x only (not Python 2.x).</p>
+</div>
+<div class="section" id="usage">
+<h1>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h1>
+<p>The program can generate two types of histograms.
+A histogram of densities for determining
+bulk properties is generated with the file
+<cite>run_histogram.py</cite>. A histogram of the sampling
+trajectory can be generated with the file
+<cite>plot_trajectory.py</cite>.
+Either program can be run by</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python eitherprogram -fi file1 file2 file3 ... -T T1
+</pre></div>
+</div>
+<p>where <cite>eitherprogram</cite> is either
+<cite>run_histogram</cite> or <cite>plot_trajectory.py</cite>,  <cite>file1</cite>, <cite>file2</cite>, <cite>file3</cite>,  and <cite>…</cite>
+are the relative paths to all the trajectory
+files from one independent simulation, and <cite>T1</cite>
+is the temperature at which the simulation was
+conducted in Kelvin. All
+arguments (including those which are optional)
+can be seen by appending <cite>-h</cite> or <cite>–help</cite>
+to the line above.</p>
+<p>It is not necessary to use this command line approach to run
+these programs. To see how
+to do this, take a look at the file <cite>examples.py</cite>
+or the functions <cite>example_butane()</cite>
+and <cite>example_pentanal()</cite> within the file <cite>plot_trajectory.py</cite>.</p>
+</div>
+<div class="section" id="useful-scripts">
+<h1>Useful Scripts<a class="headerlink" href="#useful-scripts" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="run-histogram-py">
+<h2>run_histogram.py<a class="headerlink" href="#run-histogram-py" title="Permalink to this headline">¶</a></h2>
+<p>The <cite>run_histogram.py</cite> program will calculate
+mean and errors for pressures, densities, and compressibilities,
+and compare to the block averages approach.</p>
+<p>The mean and error of the density values with
+the histogram approach are obtained from the
+density probability distributions.</p>
+<p>The pressure and compressibilities obtained from
+the histogram approach are calculated as the average of all
+pressures and compressibilities at MCCs where the pressure was calculated
+and the density was in the high density or low density regime
+(as defined by 75% of the respective peak height).
+The errors are the standard deviations of those set of values.
+These values for one independent simulation correspond to the
+fluctuations.</p>
+</div>
+<div class="section" id="plot-trajectory-py">
+<h2>plot_trajectory.py<a class="headerlink" href="#plot-trajectory-py" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+<div class="section" id="methodology">
+<h1>Methodology<a class="headerlink" href="#methodology" title="Permalink to this headline">¶</a></h1>
+<p>The statistics from the production trajectory of a
+<span class="math notranslate nohighlight">\(NVT\)</span> Gibbs ensemble Monte Carlo
+simulation are collected.
+These statistics entail <span class="math notranslate nohighlight">\(\mathcal{D}\)</span>, the distribution
+of total box densities <span class="math notranslate nohighlight">\(\rho_{i,j}\)</span>
+calculated in each simulation
+box <span class="math notranslate nohighlight">\(i\)</span> at the end of the <span class="math notranslate nohighlight">\(j\)</span>-th Monte Carlo Cycle (MCC),
+and <span class="math notranslate nohighlight">\(\mathcal{P}\)</span>, the distribution of box pressures
+<span class="math notranslate nohighlight">\(P_{i,k}\)</span>
+calculated in each simulation box
+<span class="math notranslate nohighlight">\(i\)</span> at the end of the <span class="math notranslate nohighlight">\(k\)</span>-th
+MCC where the pressure was calculated.
+Usually, the box pressures are calculated once every five to
+ten MCCs, so that the number of entries in
+<span class="math notranslate nohighlight">\(\mathcal{P}\)</span> is less than those in <span class="math notranslate nohighlight">\(\mathcal{D}\)</span>.</p>
+<p>The distribution of all observed box densities <span class="math notranslate nohighlight">\(\mathcal{D}\)</span>
+is partitioned into subsets of low
+(<span class="math notranslate nohighlight">\(\mathcal{L}\)</span>) and high (<span class="math notranslate nohighlight">\(\mathcal{H}\)</span>) densities,
+such that
+<span class="math notranslate nohighlight">\(\rho_{i,l}&lt;\rho_m  \forall i \forall l \in\mathcal{L}\)</span>
+and
+<span class="math notranslate nohighlight">\(\rho_{i,h}\ge\rho_m  \forall i \forall h \in\mathcal{H}\)</span>
+where <span class="math notranslate nohighlight">\(\rho_m\)</span> is the mean of all density values in <span class="math notranslate nohighlight">\(mathcal{D}\)</span>.</p>
+<p>For each distribution, <span class="math notranslate nohighlight">\(\mathcal{L}\)</span> and <span class="math notranslate nohighlight">\(\mathcal{H}\)</span>,
+a histogram of the densities is performed with <span class="math notranslate nohighlight">\(N_{\mathrm{B}}\)</span>
+equally-spaced bins (edges) from the minimum to maximum value of density using <a class="reference internal" href="#numpy" id="id1"><span>[NUMPY]</span></a>.
+The probabilities <span class="math notranslate nohighlight">\(Y_i\forall i \in \mathcal{Y}\)</span> of observing each density within
+each <span class="math notranslate nohighlight">\(i\)</span> nodes (adjacent bins)
+are normalized so that the sum is equal to unity.
+The <span class="math notranslate nohighlight">\(N_{\mathrm{B}}-1\)</span> density values <span class="math notranslate nohighlight">\(\rho_i \forall i \in \mathcal{Y}\)</span>
+for each node (within adjacent edges) are assumed
+to be the midpoint between adjacent edges.
+A subset of representative probabilities,
+<span class="math notranslate nohighlight">\(\mathcal{Y}^0\)</span>, is chosen as follows</p>
+<div class="math notranslate nohighlight">
+\[Y_j\ge f\max_{i\in\mathcal{Y}}Y_i\;\;\;\forall j \in \mathcal{Y}^*\]</div>
+<p>where <span class="math notranslate nohighlight">\(f\)</span> is the fraction of peak maximum.
+The fraction of peak maximum is typically 0.75
+<a class="reference internal" href="#dinpajooh2015" id="id2"><span>[DINPAJOOH2015]</span></a>.
+These probabilities and associated densities,
+<span class="math notranslate nohighlight">\(\rho_i\forall i \in \mathcal{Y}^*\)</span>
+are fit to a gaussian function.
+The initial guess for the peak height, mean,
+and standard deviation of the gaussian are obtained from
+<span class="math notranslate nohighlight">\(\max_{\forall i \in \mathcal{Y}^*}Y_i\)</span>,
+<span class="math notranslate nohighlight">\(\mu_{\forall i \in \mathcal{Y}^*}\rho_i\)</span>,
+and the standard deviation of of the distribution <span class="math notranslate nohighlight">\(\sigma_{\mathcal{Y}^*}\)</span>,
+respectively.
+The lower bounds allowed for the peak height, mean,
+and standard deviation are zero, the minimum density,
+and zero, respectively.
+The upper bounds allowed for the peak height and mean
+are <span class="math notranslate nohighlight">\(2\max_{\forall i \in \mathcal{Y}^*}Y_i\)</span> and
+<span class="math notranslate nohighlight">\(\max_{\forall i \in \mathcal{Y}^*}\rho_i\)</span>,
+respectively.
+The maximum in the standard deviation parameter
+obtained from the fitting of the gaussian
+is not constrained to a maximum finite value.
+The constrained parameter fitting is performed using
+the Trust Region Reflective algorithm as
+implemented in <a class="reference internal" href="#scipy" id="id3"><span>[SCIPY]</span></a>.</p>
+<p>Finally, the minimum density, <span class="math notranslate nohighlight">\(\rho_{\chi,\mathrm{min}}\)</span>, and maximum density
+<span class="math notranslate nohighlight">\(\rho_{\chi,\mathrm{max}}\)</span>,
+for each distribution <span class="math notranslate nohighlight">\(\chi\)</span> (<span class="math notranslate nohighlight">\(\mathcal{H}\)</span> or <span class="math notranslate nohighlight">\(\mathcal{L}\)</span>)
+corresponding to the chosen fraction of peak maximum
+<span class="math notranslate nohighlight">\(f\)</span> are calculated from the gaussian function and the optimized parameters for each peak.</p>
+<p>The final high (<span class="math notranslate nohighlight">\(\mathcal{H}^*\)</span>) and low (<span class="math notranslate nohighlight">\(\mathcal{L}^*\)</span>)
+distributions of densities are determined as follows</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\rho_{\mathcal{H},\mathrm{min}}\le \rho_i\le \rho_{\mathcal{H},\mathrm{max}} \;\;\;\;\forall i \in \mathcal{H}^*, \ni i \in \mathcal{H} \\
+\rho_{\mathcal{L},\mathrm{min}}\le \rho_i\le \rho_{\mathcal{L},\mathrm{max}} \;\;\;\;\forall i \in \mathcal{L}^*, \ni i \in \mathcal{L}\end{split}\]</div>
+<p>Similarly, the pressures corresponding to the high (<span class="math notranslate nohighlight">\(\mathcal{P}_{\mathcal{H}^*}\)</span>)
+and low (<span class="math notranslate nohighlight">\(\mathcal{P}_{\mathcal{L}^*}\)</span>)distributions of densities are determined as</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\rho_{\mathcal{H},\mathrm{min}}\le \rho_i\le \rho_{\mathcal{H},\mathrm{max}} \;\;\;\;\forall i \in \mathcal{P}_{\mathcal{H}^*}, \ni i \in \mathcal{P} \\
+\rho_{\mathcal{L},\mathrm{min}}\le \rho_i\le \rho_{\mathcal{L},\mathrm{max}} \;\;\;\;\forall i \in \mathcal{P}_{\mathcal{L}^*}, \ni i \in \mathcal{P} \\\end{split}\]</div>
+<p>The compressibility distributions at the high (<span class="math notranslate nohighlight">\(\mathcal{Z}_{\mathcal{H}^*}\)</span>)
+and low (<span class="math notranslate nohighlight">\(\mathcal{Z}_{\mathcal{L}^*}\)</span>) densities
+are calculated at the densities and pressures within <span class="math notranslate nohighlight">\(\mathcal{P}_{\mathcal{H}^*}\)</span>
+and <span class="math notranslate nohighlight">\(\mathcal{P}_{\mathcal{L}^*}\)</span>, respectively.
+The mean and standard deviation of each density regime (<span class="math notranslate nohighlight">\(\chi\in\{\mathcal{H}^*,\mathcal{L}^*\}\)</span>)
+for pressure, compressibility, and density
+are determined from the <span class="math notranslate nohighlight">\(\chi\)</span>, <span class="math notranslate nohighlight">\(\mathcal{P}_{\chi}\)</span>, and <span class="math notranslate nohighlight">\(\mathcal{Z}_{\chi}\)</span>
+distributions, respectively.</p>
+<dl class="citation">
+<dt class="label" id="numpy"><span class="brackets"><a class="fn-backref" href="#id1">NUMPY</a></span></dt>
+<dd><p>Oliphant, T. NumPy: A guide to NumPy. 2006–2019. USA: Trelgol Publishing. <a class="reference external" href="http://www.numpy.org/">http://www.numpy.org/</a></p>
+</dd>
+<dt class="label" id="dinpajooh2015"><span class="brackets"><a class="fn-backref" href="#id2">DINPAJOOH2015</a></span></dt>
+<dd><p>Dinpajooh M, Bai P, Allan DA, and Siepmann JI. Accurate and precise determination
+of critical properties from Gibbs ensemble Monte Carlo simulations. J. Chem. Phys. 143, 114113 (2015),
+<a class="reference external" href="https://doi.org/10.1063/1.4930848">https://doi.org/10.1063/1.4930848</a></p>
+</dd>
+<dt class="label" id="scipy"><span class="brackets"><a class="fn-backref" href="#id3">SCIPY</a></span></dt>
+<dd><p>Jones E, Oliphant E, Peterson P, et al. SciPy: Open Source Scientific Tools for Python. 2001–2019. <a class="reference external" href="http://www.scipy.org/">http://www.scipy.org/</a></p>
+</dd>
+</dl>
+</div>
+<div class="section" id="module-histogram.chem_constants">
+<span id="histogram"></span><h1>histogram<a class="headerlink" href="#module-histogram.chem_constants" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="module-histogram.density_histogram"></span><dl class="class">
+<dt id="histogram.density_histogram.Blocks">
+<em class="property">class </em><code class="sig-prename descclassname">histogram.density_histogram.</code><code class="sig-name descname">Blocks</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#histogram.density_histogram.Blocks" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Read input arguments and initialize data types</dt><dd><p>for one independent simulation.</p>
+</dd>
+</dl>
+<dl class="method">
+<dt id="histogram.density_histogram.Blocks.check_arguments">
+<code class="sig-name descname">check_arguments</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#histogram.density_histogram.Blocks.check_arguments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check that arguments passed in are realistic
+:return: None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="histogram.density_histogram.Blocks.choose_output_file_path">
+<code class="sig-name descname">choose_output_file_path</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#histogram.density_histogram.Blocks.choose_output_file_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Based off of input files, try to guess where to output</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="histogram.density_histogram.Blocks.initialize_data">
+<code class="sig-name descname">initialize_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#histogram.density_histogram.Blocks.initialize_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read all trajectory files and input into class attribute data types</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="histogram.density_histogram.Blocks.main">
+<code class="sig-name descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#histogram.density_histogram.Blocks.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main method of :class:
+First, calls <a class="reference internal" href="#histogram.density_histogram.Blocks.choose_output_file_path" title="histogram.density_histogram.Blocks.choose_output_file_path"><code class="xref py py-func docutils literal notranslate"><span class="pre">choose_output_file_path()</span></code></a>
+Then, calls <a class="reference internal" href="#histogram.density_histogram.Blocks.initialize_data" title="histogram.density_histogram.Blocks.initialize_data"><code class="xref py py-func docutils literal notranslate"><span class="pre">initialize_data()</span></code></a>
+Finally, outputs data from
+<a class="reference internal" href="#histogram.density_histogram.Blocks.output_blocks" title="histogram.density_histogram.Blocks.output_blocks"><code class="xref py py-func docutils literal notranslate"><span class="pre">output_blocks()</span></code></a>
+:return: None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="histogram.density_histogram.Blocks.output_blocks">
+<code class="sig-name descname">output_blocks</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#histogram.density_histogram.Blocks.output_blocks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Output block averages into a csv file or pprint based off of input arguments.</p>
+<p>Convert units to g/mL if this was requested in args</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="histogram.density_histogram.DPD">
+<em class="property">class </em><code class="sig-prename descclassname">histogram.density_histogram.</code><code class="sig-name descname">DPD</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#histogram.density_histogram.DPD" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read input arguments and initialize data types
+for one independent simulation.
+Then, make associated histograms, plot them if desired,
+and output them into desired format.</p>
+<dl class="method">
+<dt id="histogram.density_histogram.DPD.calculate_P_Z">
+<code class="sig-name descname">calculate_P_Z</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#histogram.density_histogram.DPD.calculate_P_Z" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate pressure and compressibilities for two different types of distributions</p>
+<p>Store data of mean and standard deviation of raw data values in
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">histograms</span></code>
+within
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">data</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="histogram.density_histogram.DPD.check_arguments">
+<code class="sig-name descname">check_arguments</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#histogram.density_histogram.DPD.check_arguments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if arguments passed in are realistic
+:return: None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="histogram.density_histogram.DPD.fit_density_peaks">
+<code class="sig-name descname">fit_density_peaks</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#histogram.density_histogram.DPD.fit_density_peaks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit gaussian to both density peaks. The following procedure is followed</p>
+<ol class="arabic simple">
+<li><p>Convert total box densities for each box type into one single array.</p></li>
+<li><p>Calculate the mean density out of all densities observed.</p></li>
+<li><dl class="simple">
+<dt>Partition the densities into two regions–those which</dt><dd><p>have values lower or higher than this mean value.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Within each new distribution,</dt><dd><p>perform a histogram using the number of bins requested
+during instantiation. The edges of the histogram
+correspond to the number of bins chosen, and the values
+are their corresponding probabilities normalized
+so that the sum of all probabilities is 1.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Partition histogram bins into those which have values</dt><dd><p>above the fractional threshold of the maximum value.
+Fit a gaussian function of the probabilities of
+observing each density as a function of density.</p>
+</dd>
+</dl>
+</li>
+</ol>
+<p>Store the results of the binning for each region in
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">histograms</span></code>
+for use later (plotting, outputting)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="histogram.density_histogram.DPD.fit_gaussian">
+<code class="sig-name descname">fit_gaussian</code><span class="sig-paren">(</span><em class="sig-param">bin_means</em>, <em class="sig-param">values</em><span class="sig-paren">)</span><a class="headerlink" href="#histogram.density_histogram.DPD.fit_gaussian" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit gaussian function, <a class="reference internal" href="#histogram.density_histogram.gaussian" title="histogram.density_histogram.gaussian"><code class="xref py py-func docutils literal notranslate"><span class="pre">gaussian()</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bin_means</strong> – means of density bins (nodes)</p></li>
+<li><p><strong>values</strong> – values at means of density bins</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>The initial guess for the peak height, mean, and standard deviation</dt><dd><p>of the gaussian are obtained from the maximum of the values
+above the threshold,
+the mean of the densities above the threshold,
+and the standard deviation of the
+densities above the threshold, respectively.</p>
+</dd>
+<dt>The minimum value allowed for the peak height, mean, and standard</dt><dd><p>deviation of the gaussian are 0, the minimum density
+above the threshold, and 0, respectively.</p>
+</dd>
+<dt>The maximum value allowed for the peak height and mean</dt><dd><p>of the gaussian are twice the maximum
+of the values above the threshold and the maximum density
+above the threshold, respectively.
+The standard deviation of the gaussian is not
+constrained to a finite maximum threshold.</p>
+</dd>
+<dt>The parameters are fit using <code class="xref py py-func docutils literal notranslate"><span class="pre">curve_fit()</span></code> with the</dt><dd><p>analytical jacobian <code class="xref py py-func docutils literal notranslate"><span class="pre">J_gaussian()</span></code>
+and the initial guess and bounds listed above.</p>
+</dd>
+<dt>Finally, the bounds for the values according to the fraction of the threshold</dt><dd><p>are converted into continuous bounds in density.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p>params(list) the gaussian parameters fit</p></li>
+<li><p>covariance(list) is the covariance of the gaussian parameters</p></li>
+<li><p>min_rho_gauss(float) is the minimum density of the gaussian within the threshold specified</p></li>
+<li><p>max_rho_gauss(float) is the minimum density of the gaussian within the threshold specified</p></li>
+<li><p>num_indices(int) the number of indices used in the fitting of the gaussian</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="histogram.density_histogram.DPD.histogram_P_Z_data">
+<code class="sig-name descname">histogram_P_Z_data</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">data_type</em><span class="sig-paren">)</span><a class="headerlink" href="#histogram.density_histogram.DPD.histogram_P_Z_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Obtain histogram(s) of pressure or compressibility data within region(s) or box(es)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>dict</em>) – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>results of histograms</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="histogram.density_histogram.DPD.main">
+<code class="sig-name descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#histogram.density_histogram.DPD.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main method of :class:
+First, calls <code class="xref py py-func docutils literal notranslate"><span class="pre">choose_output_file_path()</span></code>
+Then, calls <code class="xref py py-func docutils literal notranslate"><span class="pre">initialize_data()</span></code>
+The peaks are fit using
+<a class="reference internal" href="#histogram.density_histogram.DPD.fit_density_peaks" title="histogram.density_histogram.DPD.fit_density_peaks"><code class="xref py py-func docutils literal notranslate"><span class="pre">fit_density_peaks()</span></code></a>
+and the corresponding pressure and compressibilities are obtained from
+<a class="reference internal" href="#histogram.density_histogram.DPD.calculate_P_Z" title="histogram.density_histogram.DPD.calculate_P_Z"><code class="xref py py-func docutils literal notranslate"><span class="pre">calculate_P_Z()</span></code></a>
+and then plot results if <code class="xref py py-attr docutils literal notranslate"><span class="pre">make_plot</span></code> == ‘Yes’
+and then output results with
+<code class="xref py py-func docutils literal notranslate"><span class="pre">output_results()</span></code>
+:return: None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="histogram.density_histogram.DPD.output_results">
+<code class="sig-name descname">output_results</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#histogram.density_histogram.DPD.output_results" title="Permalink to this definition">¶</a></dt>
+<dd><p>Output information stored in
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">data</span></code></p>
+<p>Change to g/mL units if was desired during instantiation</p>
+<dl class="simple">
+<dt>Output results either by printing or saving to csv file,</dt><dd><p>as requested by input arguments</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="histogram.density_histogram.DPD.store_data">
+<code class="sig-name descname">store_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#histogram.density_histogram.DPD.store_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Store data of mean and standard deviation of raw data values in
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">histograms</span></code>
+within
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">data</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="histogram.density_histogram.calculate_compressibility">
+<code class="sig-prename descclassname">histogram.density_histogram.</code><code class="sig-name descname">calculate_compressibility</code><span class="sig-paren">(</span><em class="sig-param">total_densities</em>, <em class="sig-param">pressures</em>, <em class="sig-param">T</em><span class="sig-paren">)</span><a class="headerlink" href="#histogram.density_histogram.calculate_compressibility" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate compressibility factors from total densities and pressures</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>total_densities</strong> (<em>dict</em>) – total densities of boxes in molecules / nm**3</p></li>
+<li><p><strong>pressures</strong> (<em>dict</em>) – pressures in kPa</p></li>
+<li><p><strong>T</strong> (<em>float</em>) – Temperature in Kelvin</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of compressibility factors of each box for each point provided</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="histogram.density_histogram.calculate_density">
+<code class="sig-prename descclassname">histogram.density_histogram.</code><code class="sig-name descname">calculate_density</code><span class="sig-paren">(</span><em class="sig-param">volumes</em>, <em class="sig-param">number_of_chains</em>, <em class="sig-param">cycles</em><span class="sig-paren">)</span><a class="headerlink" href="#histogram.density_histogram.calculate_density" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert input number of chains and volumes to densities</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>volumes</strong> (<em>dict</em>) – volume of box at end of each cycle in nm**3</p></li>
+<li><p><strong>number_of_chains</strong> (<em>dict</em>) – number of molecules of each type and in each box during each cycle</p></li>
+<li><p><strong>cycles</strong> (<em>list</em>) – cycles over which to calculate density</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>densities</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="histogram.density_histogram.calculate_total_densities">
+<code class="sig-prename descclassname">histogram.density_histogram.</code><code class="sig-name descname">calculate_total_densities</code><span class="sig-paren">(</span><em class="sig-param">dens</em>, <em class="sig-param">boxes</em><span class="sig-paren">)</span><a class="headerlink" href="#histogram.density_histogram.calculate_total_densities" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the total (molar) density in a box by summing individual number densities</p>
+<blockquote>
+<div></div></blockquote>
+<p>ho_{mathrm{total}} = sum_i
+ho_i</p>
+<blockquote>
+<div><dl class="field-list simple">
+<dt class="field-odd">param dens</dt>
+<dd class="field-odd"><p>densities in molecule/nm**3 for each box for each molecule</p>
+</dd>
+<dt class="field-even">type dens</dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+<dt class="field-odd">param boxes</dt>
+<dd class="field-odd"><p>boxes of simulation</p>
+</dd>
+<dt class="field-even">type boxes</dt>
+<dd class="field-even"><p>list</p>
+</dd>
+<dt class="field-odd">return</dt>
+<dd class="field-odd"><p></p></dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="histogram.density_histogram.gaussian">
+<code class="sig-prename descclassname">histogram.density_histogram.</code><code class="sig-name descname">gaussian</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">a</em>, <em class="sig-param">b</em>, <em class="sig-param">c</em><span class="sig-paren">)</span><a class="headerlink" href="#histogram.density_histogram.gaussian" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gaussian function</p>
+<div class="math notranslate nohighlight">
+\[f(x) = a e^{-(x-b)^2 / 2 / c^2}\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – input variable</p></li>
+<li><p><strong>a</strong> – height of curve peak</p></li>
+<li><p><strong>b</strong> – center of peak</p></li>
+<li><p><strong>c</strong> – standard deviation</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>f(x)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="histogram.density_histogram.jac_gaussian">
+<code class="sig-prename descclassname">histogram.density_histogram.</code><code class="sig-name descname">jac_gaussian</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">a</em>, <em class="sig-param">b</em>, <em class="sig-param">c</em><span class="sig-paren">)</span><a class="headerlink" href="#histogram.density_histogram.jac_gaussian" title="Permalink to this definition">¶</a></dt>
+<dd><p>Jacobian of <a class="reference internal" href="#histogram.density_histogram.gaussian" title="histogram.density_histogram.gaussian"><code class="xref py py-func docutils literal notranslate"><span class="pre">gaussian()</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – input variable</p></li>
+<li><p><strong>a</strong> – height of curve peak</p></li>
+<li><p><strong>b</strong> – center of peak</p></li>
+<li><p><strong>c</strong> – standard deviation</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><div class="math notranslate nohighlight">
+\[\frac{\partial f}{\partial a}, \frac{\partial f}{\partial b},
+\frac{\partial f}{\partial c}\]</div>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="histogram.density_histogram.make_block_averages">
+<code class="sig-prename descclassname">histogram.density_histogram.</code><code class="sig-name descname">make_block_averages</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">number_blocks</em><span class="sig-paren">)</span><a class="headerlink" href="#histogram.density_histogram.make_block_averages" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make block averages based off of number of blocks and data provided.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>dict</em>) – a thermodynamic property measured at each point for each cycle</p></li>
+<li><p><strong>number_blocks</strong> (<em>int</em>) – number of nodes over which to average property</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>means and standard deviations of data for each box</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="histogram.density_histogram.parse_arguments">
+<code class="sig-prename descclassname">histogram.density_histogram.</code><code class="sig-name descname">parse_arguments</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#histogram.density_histogram.parse_arguments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Command-line parser for input data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>arguments to pass to either <a class="reference internal" href="#histogram.density_histogram.Blocks" title="histogram.density_histogram.Blocks"><code class="xref py py-class docutils literal notranslate"><span class="pre">Blocks</span></code></a> or <a class="reference internal" href="#histogram.density_histogram.DPD" title="histogram.density_histogram.DPD"><code class="xref py py-class docutils literal notranslate"><span class="pre">DPD</span></code></a> during instantiation</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="histogram.density_histogram.update_data_box">
+<code class="sig-prename descclassname">histogram.density_histogram.</code><code class="sig-name descname">update_data_box</code><span class="sig-paren">(</span><em class="sig-param">store_data</em>, <em class="sig-param">new_data</em><span class="sig-paren">)</span><a class="headerlink" href="#histogram.density_histogram.update_data_box" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updata information stored for data that is only box specific</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>store_data</strong> – stored information of given data</p></li>
+<li><p><strong>new_data</strong> – new information to add to stored information</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="histogram.density_histogram.update_data_molty">
+<code class="sig-prename descclassname">histogram.density_histogram.</code><code class="sig-name descname">update_data_molty</code><span class="sig-paren">(</span><em class="sig-param">store_data</em>, <em class="sig-param">new_data</em><span class="sig-paren">)</span><a class="headerlink" href="#histogram.density_histogram.update_data_molty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updata information stored for data that depends on both box and molty</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>store_data</strong> – stored information of given data</p></li>
+<li><p><strong>new_data</strong> – new information to add to stored information</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<span class="target" id="module-histogram.reader"></span><dl class="function">
+<dt id="histogram.reader.read_fort12">
+<code class="sig-prename descclassname">histogram.reader.</code><code class="sig-name descname">read_fort12</code><span class="sig-paren">(</span><em class="sig-param">file_name</em>, <em class="sig-param">cycle_start</em><span class="sig-paren">)</span><a class="headerlink" href="#histogram.reader.read_fort12" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read fort.12 (trajectory) file for MCCCS-MN code output file style.
+Most inner data type is {cycle: value}. This is helpful for finding out
+what cycle a certain value occured at, etc.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_name</strong> (<em>str</em>) – name of file to open and read</p></li>
+<li><p><strong>cycle_start</strong> (<em>int</em>) – cycle number to start at (for labeling data explicitly at each cycle)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>(molecular_weights, number_of_molecules, box_volume, box_pressure, iratp, cycle_counter)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<span class="target" id="module-histogram.trajectory_histogram"></span><dl class="class">
+<dt id="histogram.trajectory_histogram.Trajectory">
+<em class="property">class </em><code class="sig-prename descclassname">histogram.trajectory_histogram.</code><code class="sig-name descname">Trajectory</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#histogram.trajectory_histogram.Trajectory" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="histogram.trajectory_histogram.Trajectory.initialize_data">
+<code class="sig-name descname">initialize_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#histogram.trajectory_histogram.Trajectory.initialize_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read all trajectory files and input into class attribute data types</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="histogram.trajectory_histogram.Trajectory.main">
+<code class="sig-name descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#histogram.trajectory_histogram.Trajectory.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main workflow for trajectory</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-histogram.writer"></span></div>
+<div class="section" id="module-run_histogram">
+<span id="scripting-files"></span><h1>scripting files<a class="headerlink" href="#module-run_histogram" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="run_histogram.run">
+<code class="sig-prename descclassname">run_histogram.</code><code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#run_histogram.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform histogram analysis. Main function of run_histogram.py.
+:return: None</p>
+</dd></dl>
+
+<span class="target" id="module-plotting_util"></span><span class="target" id="module-plot_trajectory"></span><span class="target" id="module-examples"></span><p>example workflows for using the histogram code. To run the examples,
+call the functions in this file</p>
+<dl class="function">
+<dt id="examples.butane">
+<code class="sig-prename descclassname">examples.</code><code class="sig-name descname">butane</code><span class="sig-paren">(</span><em class="sig-param">T</em><span class="sig-paren">)</span><a class="headerlink" href="#examples.butane" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>analyze the data for butane at T K, located in the example_data/butane_XXXK directory</dt><dd><p>where XXX is the temperature</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="examples.example_bin_width">
+<code class="sig-prename descclassname">examples.</code><code class="sig-name descname">example_bin_width</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#examples.example_bin_width" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>analyze effect of number of bins chosen on</dt><dd><p>the data for pentanal at 360K, located in the example_data/pentanal_360K directory</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="examples.pentanal">
+<code class="sig-prename descclassname">examples.</code><code class="sig-name descname">pentanal</code><span class="sig-paren">(</span><em class="sig-param">list_of_indep_sims</em>, <em class="sig-param">T=0</em>, <em class="sig-param">number_of_bins=0</em>, <em class="sig-param">average_fmt=''</em><span class="sig-paren">)</span><a class="headerlink" href="#examples.pentanal" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>analyze the data for pentanal at a given temperature=T, located in the example_data/pentanal_XXXK directory</dt><dd><p>where XXX is the temperature</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>list_of_indep_sims</strong> (<em>list</em>) – independent simulations for which to average over</p></li>
+<li><p><strong>T</strong> (<em>float</em>) – temperature of simulation in K</p></li>
+<li><p><strong>number_of_bins</strong> (<em>int</em>) – number of bins to analyze over for each region</p></li>
+<li><p><strong>average_fmt</strong> (<em>str</em>) – subscript for identifier in data output</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<span class="target" id="module-analysis_factory"></span></div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">GEMC_histogram_analysis</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Robert F. DeJaco.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

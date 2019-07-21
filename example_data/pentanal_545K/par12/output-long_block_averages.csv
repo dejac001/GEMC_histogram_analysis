@@ -1,0 +1,4 @@
+Property,Units,Box 1 Density Mean,Box 1 Density Standard Deviation,Box 2 Density Mean,Box 2 Density Standard Deviation
+pressure,kPa,3.492126e+03,1.304934e+02,3.380515e+03,1.431005e+02
+compressibility,dimensionless,1.505209e-01,3.613804e-03,5.372552e-01,3.661094e-02
+density,chains / nm**3,3.064617e+00,7.026952e-02,8.668557e-01,8.416144e-02

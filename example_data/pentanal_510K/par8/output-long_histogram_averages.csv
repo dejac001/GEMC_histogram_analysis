@@ -1,0 +1,4 @@
+Property,Units,High Density Mean,High Density Standard Deviation,Low Density Mean,Low Density Standard Deviation
+pressure,kPa,2.153477e+03,1.102518e+04,2.075562e+03,1.026525e+03
+compressibility,dimensionless,7.893686e-02,4.171890e-01,6.913811e-01,3.290624e-01
+density,chains / nm**3,3.754510e+00,6.366478e-02,4.086518e-01,2.784862e-02

@@ -1,0 +1,13 @@
+Property        ,Key                  ,Mean        ,Standard Error of Mean
+pressure        ,High Density Mean    ,3402.213438 ,30.991354             
+pressure        ,Low Density Mean     ,3399.070688 ,16.048436             
+pressure        ,Box 1 Density Mean   ,3401.782563 ,31.160397             
+pressure        ,Box 2 Density Mean   ,3399.458187 ,16.019229             
+compressibility ,High Density Mean    ,0.147023    ,0.000773              
+compressibility ,Low Density Mean     ,0.530518    ,0.007640              
+compressibility ,Box 1 Density Mean   ,0.146957    ,0.000779              
+compressibility ,Box 2 Density Mean   ,0.530384    ,0.007618              
+density         ,High Density Mean    ,3.078786    ,0.021424              
+density         ,Low Density Mean     ,0.832582    ,0.018779              
+density         ,Box 1 Density Mean   ,3.056644    ,0.016692              
+density         ,Box 2 Density Mean   ,0.892765    ,0.016794              
