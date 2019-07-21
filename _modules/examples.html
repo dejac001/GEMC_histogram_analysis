@@ -1,0 +1,255 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>examples &mdash; GEMC_histogram_analysis v1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> GEMC_histogram_analysis
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">GEMC_histogram_analysis</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">Module code</a> &raquo;</li>
+        
+      <li>examples</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for examples</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">example workflows for using the histogram code. To run the examples,</span>
+<span class="sd">call the functions in this file</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">from</span> <span class="nn">analysis_factory</span> <span class="k">import</span> <span class="n">RunAllIndepSims</span><span class="p">,</span> <span class="n">average</span>
+
+
+<div class="viewcode-block" id="butane"><a class="viewcode-back" href="../index.html#examples.butane">[docs]</a><span class="k">def</span> <span class="nf">butane</span><span class="p">(</span><span class="n">T</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    analyze the data for butane at T K, located in the example_data/butane_XXXK directory</span>
+<span class="sd">        where XXX is the temperature</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">RunAllIndepSims</span><span class="p">(</span><span class="n">temperature</span><span class="o">=</span><span class="n">T</span><span class="p">,</span> <span class="n">n_bins</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">indep_sim_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">9</span><span class="p">)))</span>
+    <span class="k">for</span> <span class="n">sim</span> <span class="ow">in</span> <span class="n">indep_sim_list</span><span class="p">:</span>
+        <span class="n">results</span><span class="o">.</span><span class="n">run_one_indep_sim</span><span class="p">(</span><span class="s1">&#39;example_data/butane_</span><span class="si">%i</span><span class="s1">K/</span><span class="si">%s</span><span class="s1">/&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">sim</span><span class="p">),</span> <span class="n">plot</span><span class="o">=</span><span class="s1">&#39;Yes&#39;</span><span class="p">)</span>
+    <span class="n">average</span><span class="p">(</span><span class="s1">&#39;example_data/butane_</span><span class="si">%i</span><span class="s1">K&#39;</span> <span class="o">%</span> <span class="n">T</span><span class="p">,</span> <span class="n">indep_sim_list</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">butane_400K</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">butane</span><span class="p">(</span><span class="mi">400</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">butane_264K</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">butane</span><span class="p">(</span><span class="mi">264</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="pentanal"><a class="viewcode-back" href="../index.html#examples.pentanal">[docs]</a><span class="k">def</span> <span class="nf">pentanal</span><span class="p">(</span><span class="n">list_of_indep_sims</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">number_of_bins</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">average_fmt</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    analyze the data for pentanal at a given temperature=T, located in the example_data/pentanal_XXXK directory</span>
+<span class="sd">        where XXX is the temperature</span>
+
+<span class="sd">    :param list_of_indep_sims: independent simulations for which to average over</span>
+<span class="sd">    :param T: temperature of simulation in K</span>
+<span class="sd">    :param number_of_bins: number of bins to analyze over for each region</span>
+<span class="sd">    :param average_fmt: subscript for identifier in data output</span>
+<span class="sd">    :type average_fmt: str</span>
+<span class="sd">    :type number_of_bins: int</span>
+<span class="sd">    :type T: float</span>
+<span class="sd">    :type list_of_indep_sims: list</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">RunAllIndepSims</span><span class="p">(</span><span class="n">temperature</span><span class="o">=</span><span class="n">T</span><span class="p">,</span> <span class="n">n_bins</span><span class="o">=</span><span class="n">number_of_bins</span><span class="p">)</span>
+    <span class="k">for</span> <span class="nb">dir</span> <span class="ow">in</span> <span class="n">list_of_indep_sims</span><span class="p">:</span>
+        <span class="n">results</span><span class="o">.</span><span class="n">run_one_indep_sim</span><span class="p">(</span><span class="s1">&#39;example_data/pentanal_</span><span class="si">%i</span><span class="s1">K/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="nb">dir</span><span class="p">),</span> <span class="n">plot</span><span class="o">=</span><span class="s1">&#39;Yes&#39;</span><span class="p">,</span>
+                                  <span class="n">output_file_name</span><span class="o">=</span><span class="s1">&#39;output&#39;</span> <span class="o">+</span> <span class="n">average_fmt</span><span class="p">)</span>
+    <span class="n">average</span><span class="p">(</span><span class="s1">&#39;example_data/pentanal_</span><span class="si">%i</span><span class="s1">K&#39;</span> <span class="o">%</span> <span class="n">T</span><span class="p">,</span> <span class="n">list_of_indep_sims</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="n">average_fmt</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">pentanal_360K_short</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">indep_sims</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="s1">&#39;par&#39;</span><span class="o">+</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span>  <span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">9</span><span class="p">)))</span>
+    <span class="n">pentanal</span><span class="p">(</span><span class="n">indep_sims</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="mi">360</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">pentanal_long</span><span class="p">(</span><span class="n">temperature</span><span class="p">,</span> <span class="n">number_of_bins</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">average_fmt</span><span class="o">=</span><span class="s1">&#39;-long&#39;</span><span class="p">):</span>
+    <span class="n">indep_sims</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;par</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">17</span><span class="p">))]</span>
+    <span class="n">pentanal</span><span class="p">(</span><span class="n">indep_sims</span><span class="p">,</span> <span class="o">**</span><span class="p">{</span><span class="s1">&#39;T&#39;</span><span class="p">:</span> <span class="n">temperature</span><span class="p">,</span> <span class="s1">&#39;number_of_bins&#39;</span><span class="p">:</span> <span class="n">number_of_bins</span><span class="p">,</span>
+                            <span class="s1">&#39;average_fmt&#39;</span><span class="p">:</span> <span class="s1">&#39;-long&#39;</span><span class="p">})</span>
+
+
+<div class="viewcode-block" id="example_bin_width"><a class="viewcode-back" href="../index.html#examples.example_bin_width">[docs]</a><span class="k">def</span> <span class="nf">example_bin_width</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    analyze effect of number of bins chosen on</span>
+<span class="sd">        the data for pentanal at 360K, located in the example_data/pentanal_360K directory</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">n_bins</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">100</span><span class="p">]:</span>
+        <span class="n">pentanal_360K_short</span><span class="p">(</span><span class="n">number_of_bins</span><span class="o">=</span><span class="n">n_bins</span><span class="p">,</span> <span class="n">average_fmt</span><span class="o">=</span><span class="s1">&#39;-</span><span class="si">%i</span><span class="s1">-bins&#39;</span> <span class="o">%</span> <span class="n">n_bins</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Robert F. DeJaco
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

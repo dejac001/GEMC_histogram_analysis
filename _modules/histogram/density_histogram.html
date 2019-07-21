@@ -1,0 +1,975 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>histogram.density_histogram &mdash; GEMC_histogram_analysis v1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> GEMC_histogram_analysis
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">GEMC_histogram_analysis</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>histogram.density_histogram</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for histogram.density_histogram</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="k">import</span> <span class="n">curve_fit</span>
+<span class="kn">from</span> <span class="nn">.chem_constants</span> <span class="k">import</span> <span class="n">N_av</span><span class="p">,</span> <span class="n">R</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">reader</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+
+<div class="viewcode-block" id="gaussian"><a class="viewcode-back" href="../../index.html#histogram.density_histogram.gaussian">[docs]</a><span class="k">def</span> <span class="nf">gaussian</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Gaussian function</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        f(x) = a e^{-(x-b)^2 / 2 / c^2}</span>
+
+<span class="sd">    :param x: input variable</span>
+<span class="sd">    :param a: height of curve peak</span>
+<span class="sd">    :param b: center of peak</span>
+<span class="sd">    :param c: standard deviation</span>
+<span class="sd">    :return: f(x)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">square_term</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span> <span class="o">/</span> <span class="n">c</span>
+    <span class="n">exponential_term</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">1.</span> <span class="o">/</span> <span class="mf">2.</span> <span class="o">*</span> <span class="n">square_term</span> <span class="o">*</span> <span class="n">square_term</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">a</span> <span class="o">*</span> <span class="n">exponential_term</span></div>
+
+
+<div class="viewcode-block" id="jac_gaussian"><a class="viewcode-back" href="../../index.html#histogram.density_histogram.jac_gaussian">[docs]</a><span class="k">def</span> <span class="nf">jac_gaussian</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Jacobian of :py:func:`~histogram.density_histogram.gaussian`</span>
+
+<span class="sd">    :param x: input variable</span>
+<span class="sd">    :param a: height of curve peak</span>
+<span class="sd">    :param b: center of peak</span>
+<span class="sd">    :param c: standard deviation</span>
+<span class="sd">    :return:</span>
+<span class="sd">        .. math:: \\frac{\partial f}{\partial a}, \\frac{\partial f}{\partial b},</span>
+<span class="sd">            \\frac{\partial f}{\partial c}</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ds</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span>
+    <span class="n">square_term</span> <span class="o">=</span> <span class="n">ds</span> <span class="o">/</span> <span class="n">c</span>
+    <span class="n">power_term</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.</span> <span class="o">/</span> <span class="mf">2.</span> <span class="o">*</span> <span class="n">square_term</span> <span class="o">*</span> <span class="n">square_term</span>
+    <span class="n">exponential_term</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">power_term</span><span class="p">)</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">a</span> <span class="o">*</span> <span class="n">exponential_term</span>
+
+    <span class="n">J</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+        <span class="n">exponential_term</span><span class="p">,</span>
+        <span class="n">f</span> <span class="o">*</span> <span class="n">ds</span> <span class="o">/</span> <span class="n">c</span> <span class="o">/</span> <span class="n">c</span><span class="p">,</span>
+        <span class="n">f</span> <span class="o">*</span> <span class="n">ds</span> <span class="o">*</span> <span class="n">ds</span> <span class="o">/</span> <span class="n">c</span> <span class="o">/</span> <span class="n">c</span> <span class="o">/</span> <span class="n">c</span>
+    <span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">J</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="calculate_density"><a class="viewcode-back" href="../../index.html#histogram.density_histogram.calculate_density">[docs]</a><span class="k">def</span> <span class="nf">calculate_density</span><span class="p">(</span><span class="n">volumes</span><span class="p">,</span> <span class="n">number_of_chains</span><span class="p">,</span> <span class="n">cycles</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert input number of chains and volumes to densities</span>
+
+<span class="sd">    .. warning:</span>
+<span class="sd">        Will be incorrect for boxes where molecules have biasing potentials.</span>
+<span class="sd">        Does not correct the number density for biasing potential in box.</span>
+
+<span class="sd">    .. note:</span>
+<span class="sd">        Biasing potential could be compatible by reading values in run1a.dat file and storing</span>
+<span class="sd">        in :py:class:`~histogram.density_histogram.Blocks`</span>
+
+<span class="sd">    :param volumes: volume of box at end of each cycle in nm**3</span>
+<span class="sd">    :param number_of_chains: number of molecules of each type and in each box during each cycle</span>
+<span class="sd">    :type number_of_chains: dict</span>
+<span class="sd">    :param cycles: cycles over which to calculate density</span>
+<span class="sd">    :type cycles: list</span>
+<span class="sd">    :type volumes: dict</span>
+<span class="sd">    :return: densities</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">density</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">mol</span> <span class="ow">in</span> <span class="n">number_of_chains</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">density</span><span class="p">[</span><span class="n">mol</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">box</span> <span class="ow">in</span> <span class="n">number_of_chains</span><span class="p">[</span><span class="n">mol</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">density</span><span class="p">[</span><span class="n">mol</span><span class="p">][</span><span class="n">box</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">cycle</span> <span class="ow">in</span> <span class="n">cycles</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="n">cycle</span> <span class="ow">in</span> <span class="n">volumes</span><span class="p">[</span><span class="n">box</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="s1">&#39;Cycle </span><span class="si">%i</span><span class="s1"> not in Volumes&#39;</span> <span class="o">%</span> <span class="n">cycle</span>
+                <span class="k">assert</span> <span class="n">cycle</span> <span class="ow">in</span> <span class="n">number_of_chains</span><span class="p">[</span><span class="n">mol</span><span class="p">][</span><span class="n">box</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="s1">&#39;Cycle </span><span class="si">%i</span><span class="s1"> not in number of chains&#39;</span> <span class="o">%</span> <span class="n">cycle</span>
+                <span class="n">density</span><span class="p">[</span><span class="n">mol</span><span class="p">][</span><span class="n">box</span><span class="p">][</span><span class="n">cycle</span><span class="p">]</span> <span class="o">=</span> <span class="n">number_of_chains</span><span class="p">[</span><span class="n">mol</span><span class="p">][</span><span class="n">box</span><span class="p">][</span><span class="n">cycle</span><span class="p">]</span> <span class="o">/</span> <span class="n">volumes</span><span class="p">[</span><span class="n">box</span><span class="p">][</span><span class="n">cycle</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">density</span></div>
+
+
+<div class="viewcode-block" id="calculate_compressibility"><a class="viewcode-back" href="../../index.html#histogram.density_histogram.calculate_compressibility">[docs]</a><span class="k">def</span> <span class="nf">calculate_compressibility</span><span class="p">(</span><span class="n">total_densities</span><span class="p">,</span> <span class="n">pressures</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculate compressibility factors from total densities and pressures</span>
+
+<span class="sd">    :param total_densities: total densities of boxes in molecules / nm**3</span>
+<span class="sd">    :type total_densities: dict</span>
+<span class="sd">    :param pressures: pressures in kPa</span>
+<span class="sd">    :type pressures: dict</span>
+<span class="sd">    :param T: Temperature in Kelvin</span>
+<span class="sd">    :type T: float</span>
+<span class="sd">    :return: List of compressibility factors of each box for each point provided</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">.chem_constants</span> <span class="k">import</span> <span class="n">N_av</span><span class="p">,</span> <span class="n">R</span>
+    <span class="n">Z</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">box</span> <span class="ow">in</span> <span class="n">pressures</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">Z</span><span class="p">[</span><span class="n">box</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">cycle</span> <span class="ow">in</span> <span class="n">pressures</span><span class="p">[</span><span class="n">box</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">Z</span><span class="p">[</span><span class="n">box</span><span class="p">][</span><span class="n">cycle</span><span class="p">]</span> <span class="o">=</span> <span class="n">pressures</span><span class="p">[</span><span class="n">box</span><span class="p">][</span><span class="n">cycle</span><span class="p">]</span><span class="o">/</span><span class="n">total_densities</span><span class="p">[</span><span class="n">box</span><span class="p">][</span><span class="n">cycle</span><span class="p">]</span> <span class="o">*</span> <span class="n">N_av</span> <span class="o">/</span> <span class="n">R</span><span class="p">[</span><span class="s1">&#39;nm**3*kPa/(mol*K)&#39;</span><span class="p">]</span><span class="o">/</span><span class="n">T</span>
+    <span class="k">return</span> <span class="n">Z</span></div>
+
+
+<div class="viewcode-block" id="make_block_averages"><a class="viewcode-back" href="../../index.html#histogram.density_histogram.make_block_averages">[docs]</a><span class="k">def</span> <span class="nf">make_block_averages</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">number_blocks</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Make block averages based off of number of blocks and data provided.</span>
+
+<span class="sd">    :param data: a thermodynamic property measured at each point for each cycle</span>
+<span class="sd">    :type data: dict</span>
+<span class="sd">    :param number_blocks: number of nodes over which to average property</span>
+<span class="sd">    :type number_blocks: int</span>
+<span class="sd">    :return: means and standard deviations of data for each box</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">block_averages</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">box</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">vals</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">box</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="n">block_averages</span><span class="p">[</span><span class="n">box</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">number_cycles</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">vals</span><span class="p">)</span>
+        <span class="n">cycles_per_block</span> <span class="o">=</span> <span class="n">number_cycles</span> <span class="o">//</span> <span class="n">number_blocks</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">number_blocks</span><span class="p">):</span>
+            <span class="n">my_values</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">cycles_per_block</span><span class="p">:(</span><span class="n">i</span> <span class="o">*</span> <span class="n">cycles_per_block</span> <span class="o">+</span> <span class="n">cycles_per_block</span><span class="p">)]</span>
+            <span class="n">block_averages</span><span class="p">[</span><span class="n">box</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">my_values</span><span class="p">))</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">box</span><span class="p">,</span> <span class="n">vals</span> <span class="ow">in</span> <span class="n">block_averages</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">data</span><span class="p">[</span><span class="n">box</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;mean&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">vals</span><span class="p">),</span> <span class="s1">&#39;stdev&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">vals</span><span class="p">)}</span>
+    <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="calculate_total_densities"><a class="viewcode-back" href="../../index.html#histogram.density_histogram.calculate_total_densities">[docs]</a><span class="k">def</span> <span class="nf">calculate_total_densities</span><span class="p">(</span><span class="n">dens</span><span class="p">,</span> <span class="n">boxes</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculate the total (molar) density in a box by summing individual number densities</span>
+
+<span class="sd">    .. math:</span>
+<span class="sd">        \rho_{\mathrm{total}} = \sum_i\rho_i</span>
+
+<span class="sd">    :param dens: densities in molecule/nm**3 for each box for each molecule</span>
+<span class="sd">    :type dens: dict</span>
+<span class="sd">    :param boxes: boxes of simulation</span>
+<span class="sd">    :type boxes: list</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">total_densities</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">box</span> <span class="ow">in</span> <span class="n">boxes</span><span class="p">:</span>
+        <span class="n">total_densities</span><span class="p">[</span><span class="n">box</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">cycle</span> <span class="ow">in</span> <span class="n">dens</span><span class="p">[</span><span class="s1">&#39;molecule 1&#39;</span><span class="p">][</span><span class="n">box</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">my_total_dens</span> <span class="o">=</span> <span class="mf">0.</span>
+            <span class="k">for</span> <span class="n">molty</span> <span class="ow">in</span> <span class="n">dens</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">my_total_dens</span> <span class="o">+=</span> <span class="n">dens</span><span class="p">[</span><span class="n">molty</span><span class="p">][</span><span class="n">box</span><span class="p">][</span><span class="n">cycle</span><span class="p">]</span>
+            <span class="n">total_densities</span><span class="p">[</span><span class="n">box</span><span class="p">][</span><span class="n">cycle</span><span class="p">]</span> <span class="o">=</span> <span class="n">my_total_dens</span>
+    <span class="k">return</span> <span class="n">total_densities</span></div>
+
+
+<div class="viewcode-block" id="update_data_box"><a class="viewcode-back" href="../../index.html#histogram.density_histogram.update_data_box">[docs]</a><span class="k">def</span> <span class="nf">update_data_box</span><span class="p">(</span><span class="n">store_data</span><span class="p">,</span> <span class="n">new_data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Updata information stored for data that is only box specific</span>
+
+<span class="sd">    :param store_data: stored information of given data</span>
+<span class="sd">    :param new_data: new information to add to stored information</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">box</span> <span class="ow">in</span> <span class="n">new_data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">box</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">store_data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">store_data</span><span class="p">[</span><span class="n">box</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">cycle</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">new_data</span><span class="p">[</span><span class="n">box</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">assert</span> <span class="n">cycle</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">store_data</span><span class="p">[</span><span class="n">box</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="s1">&#39;Cycle </span><span class="si">{}</span><span class="s1"> already in stored data&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cycle</span><span class="p">)</span>
+            <span class="n">store_data</span><span class="p">[</span><span class="n">box</span><span class="p">][</span><span class="n">cycle</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span></div>
+
+
+<div class="viewcode-block" id="update_data_molty"><a class="viewcode-back" href="../../index.html#histogram.density_histogram.update_data_molty">[docs]</a><span class="k">def</span> <span class="nf">update_data_molty</span><span class="p">(</span><span class="n">store_data</span><span class="p">,</span> <span class="n">new_data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Updata information stored for data that depends on both box and molty</span>
+
+<span class="sd">    :param store_data: stored information of given data</span>
+<span class="sd">    :param new_data: new information to add to stored information</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">nmolty</span> <span class="ow">in</span> <span class="n">new_data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">nmolty</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">store_data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">store_data</span><span class="p">[</span><span class="n">nmolty</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">update_data_box</span><span class="p">(</span><span class="n">store_data</span><span class="p">[</span><span class="n">nmolty</span><span class="p">],</span> <span class="n">new_data</span><span class="p">[</span><span class="n">nmolty</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="Blocks"><a class="viewcode-back" href="../../index.html#histogram.density_histogram.Blocks">[docs]</a><span class="k">class</span> <span class="nc">Blocks</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Read input arguments and initialize data types</span>
+<span class="sd">        for one independent simulation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_blocks</span> <span class="o">=</span> <span class="mi">10</span>  <span class="c1"># only matters for computing error of ONE independent simulation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">files</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;files&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;temperature&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;d_units&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_file_name</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;output_file_name&#39;</span><span class="p">]</span>
+        <span class="n">Blocks</span><span class="o">.</span><span class="n">check_arguments</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;pressure&#39;</span><span class="p">:</span> <span class="s1">&#39;kPa&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;density&#39;</span><span class="p">:</span> <span class="s1">&#39;chains / nm**3&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;compressibility&#39;</span><span class="p">:</span> <span class="s1">&#39;dimensionless&#39;</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total_densities</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pressures</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compressibilities</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">block_averages</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;pressure&#39;</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="s1">&#39;compressibility&#39;</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="s1">&#39;density&#39;</span><span class="p">:</span> <span class="p">{}</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total_densities_with_pressure</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iratp</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">molecular_weight</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Blocks.choose_output_file_path"><a class="viewcode-back" href="../../index.html#histogram.density_histogram.Blocks.choose_output_file_path">[docs]</a>    <span class="k">def</span> <span class="nf">choose_output_file_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Based off of input files, try to guess where to output</span>
+
+<span class="sd">        .. warning: This feature has not been tested thoroughly on a wide distribution</span>
+<span class="sd">            of possible input arguments. It might put output files</span>
+<span class="sd">            in places that are not expected</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fort_12_paths</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;/&#39;</span> <span class="ow">in</span> <span class="n">file</span><span class="p">:</span>
+                <span class="n">path</span> <span class="o">=</span> <span class="n">file</span><span class="p">[:</span><span class="n">file</span><span class="o">.</span><span class="n">rfind</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)]</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span>
+            <span class="k">if</span> <span class="n">path</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">fort_12_paths</span><span class="p">:</span>
+                <span class="n">fort_12_paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">fort_12_paths</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">=</span> <span class="n">fort_12_paths</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;   ambiguous output path, choosing the first one&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">=</span> <span class="n">fort_12_paths</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Blocks.check_arguments"><a class="viewcode-back" href="../../index.html#histogram.density_histogram.Blocks.check_arguments">[docs]</a>    <span class="k">def</span> <span class="nf">check_arguments</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check that arguments passed in are realistic</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="p">,</span> <span class="s1">&#39;At least one trajectory file needs to be provided&#39;</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="s1">&#39;Temperature needs to be input&#39;</span></div>
+
+<div class="viewcode-block" id="Blocks.initialize_data"><a class="viewcode-back" href="../../index.html#histogram.density_histogram.Blocks.initialize_data">[docs]</a>    <span class="k">def</span> <span class="nf">initialize_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read all trajectory files and input into class attribute data types</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">all_data</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="p">{}</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;N&#39;</span><span class="p">,</span> <span class="s1">&#39;V&#39;</span><span class="p">]}</span>
+        <span class="n">total_cycles</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">m_weights</span><span class="p">,</span> <span class="n">f_nmolty</span><span class="p">,</span> <span class="n">f_volume</span><span class="p">,</span>
+             <span class="n">f_pressure</span><span class="p">,</span> <span class="n">iratp</span><span class="p">,</span> <span class="n">total_cycles</span><span class="p">)</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read_fort12</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">total_cycles</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">iratp</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">iratp</span> <span class="o">=</span> <span class="n">iratp</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">molecular_weight</span> <span class="o">=</span> <span class="n">m_weights</span><span class="p">[</span><span class="s1">&#39;molecule 1&#39;</span><span class="p">]</span>  <span class="c1">#</span>
+            <span class="n">update_data_molty</span><span class="p">(</span><span class="n">all_data</span><span class="p">[</span><span class="s1">&#39;N&#39;</span><span class="p">],</span> <span class="n">f_nmolty</span><span class="p">)</span>
+            <span class="n">update_data_box</span><span class="p">(</span><span class="n">all_data</span><span class="p">[</span><span class="s1">&#39;V&#39;</span><span class="p">],</span> <span class="n">f_volume</span><span class="p">)</span>
+            <span class="n">update_data_box</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pressures</span><span class="p">,</span> <span class="n">f_pressure</span><span class="p">)</span>
+        <span class="n">boxes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pressures</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">all_densities</span> <span class="o">=</span> <span class="n">calculate_density</span><span class="p">(</span><span class="n">all_data</span><span class="p">[</span><span class="s1">&#39;V&#39;</span><span class="p">],</span> <span class="n">all_data</span><span class="p">[</span><span class="s1">&#39;N&#39;</span><span class="p">],</span>
+                                          <span class="n">cycles</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">all_data</span><span class="p">[</span><span class="s1">&#39;V&#39;</span><span class="p">][</span><span class="s1">&#39;box 1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total_densities</span> <span class="o">=</span> <span class="n">calculate_total_densities</span><span class="p">(</span><span class="n">all_densities</span><span class="p">,</span> <span class="n">boxes</span><span class="p">)</span>
+        <span class="n">densities_with_pressure</span> <span class="o">=</span> <span class="n">calculate_density</span><span class="p">(</span><span class="n">all_data</span><span class="p">[</span><span class="s1">&#39;V&#39;</span><span class="p">],</span> <span class="n">all_data</span><span class="p">[</span><span class="s1">&#39;N&#39;</span><span class="p">],</span>
+                                                    <span class="n">cycles</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pressures</span><span class="p">[</span><span class="s1">&#39;box 1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total_densities_with_pressure</span> <span class="o">=</span> <span class="n">calculate_total_densities</span><span class="p">(</span><span class="n">densities_with_pressure</span><span class="p">,</span> <span class="n">boxes</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compressibilities</span> <span class="o">=</span> <span class="n">calculate_compressibility</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_densities_with_pressure</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pressures</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">block_averages</span><span class="p">[</span><span class="s1">&#39;pressure&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">make_block_averages</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pressures</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_blocks</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">block_averages</span><span class="p">[</span><span class="s1">&#39;compressibility&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">make_block_averages</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compressibilities</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_blocks</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">block_averages</span><span class="p">[</span><span class="s1">&#39;density&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">make_block_averages</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_densities</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_blocks</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Blocks.output_blocks"><a class="viewcode-back" href="../../index.html#histogram.density_histogram.Blocks.output_blocks">[docs]</a>    <span class="k">def</span> <span class="nf">output_blocks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Output block averages into a csv file or pprint based off of input arguments.</span>
+
+<span class="sd">        Convert units to g/mL if this was requested in args</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unit</span> <span class="o">==</span> <span class="s2">&quot;g/mL&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">[</span><span class="s2">&quot;density&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;g/mL&quot;</span>
+            <span class="n">vals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">block_averages</span><span class="p">[</span><span class="s2">&quot;density&quot;</span><span class="p">]</span>
+            <span class="n">vals</span><span class="p">[</span><span class="s1">&#39;box 1&#39;</span><span class="p">][</span><span class="s1">&#39;mean&#39;</span><span class="p">]</span> <span class="o">*=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">N_av</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mf">1e-21</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">molecular_weight</span>
+            <span class="n">vals</span><span class="p">[</span><span class="s1">&#39;box 2&#39;</span><span class="p">][</span><span class="s1">&#39;mean&#39;</span><span class="p">]</span> <span class="o">*=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">N_av</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mf">1e-21</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">molecular_weight</span>
+            <span class="n">vals</span><span class="p">[</span><span class="s1">&#39;box 1&#39;</span><span class="p">][</span><span class="s1">&#39;stdev&#39;</span><span class="p">]</span> <span class="o">*=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">N_av</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mf">1e-21</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">molecular_weight</span>
+            <span class="n">vals</span><span class="p">[</span><span class="s1">&#39;box 1&#39;</span><span class="p">][</span><span class="s1">&#39;stdev&#39;</span><span class="p">]</span> <span class="o">*=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">N_av</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mf">1e-21</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">molecular_weight</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_file_name</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">pprint</span>
+            <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_file_name</span> <span class="o">+</span> <span class="s1">&#39;_block_averages.csv&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">g</span><span class="p">:</span>
+                <span class="n">g</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Property,Units,Box 1 Density Mean,Box 1 Density Standard Deviation,&#39;</span>
+                        <span class="s1">&#39;Box 2 Density Mean,Box 2 Density Standard Deviation</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="nb">property</span> <span class="ow">in</span> <span class="s1">&#39;pressure&#39;</span><span class="p">,</span> <span class="s1">&#39;compressibility&#39;</span><span class="p">,</span> <span class="s1">&#39;density&#39;</span><span class="p">:</span>
+                    <span class="n">vals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">block_averages</span><span class="p">[</span><span class="nb">property</span><span class="p">]</span>
+                    <span class="n">g</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">,</span><span class="si">%e</span><span class="s1">,</span><span class="si">%e</span><span class="s1">,</span><span class="si">%e</span><span class="s1">,</span><span class="si">%e</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">property</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">[</span><span class="nb">property</span><span class="p">],</span>
+                                                     <span class="n">vals</span><span class="p">[</span><span class="s1">&#39;box 1&#39;</span><span class="p">][</span><span class="s1">&#39;mean&#39;</span><span class="p">],</span> <span class="n">vals</span><span class="p">[</span><span class="s1">&#39;box 1&#39;</span><span class="p">][</span><span class="s1">&#39;stdev&#39;</span><span class="p">],</span>
+                                                     <span class="n">vals</span><span class="p">[</span><span class="s1">&#39;box 2&#39;</span><span class="p">][</span><span class="s1">&#39;mean&#39;</span><span class="p">],</span> <span class="n">vals</span><span class="p">[</span><span class="s1">&#39;box 2&#39;</span><span class="p">][</span><span class="s1">&#39;stdev&#39;</span><span class="p">]</span>
+                                                     <span class="p">))</span></div>
+
+<div class="viewcode-block" id="Blocks.main"><a class="viewcode-back" href="../../index.html#histogram.density_histogram.Blocks.main">[docs]</a>    <span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Main method of :class:</span>
+<span class="sd">        First, calls :py:func:`~histogram.density_histogram.Blocks.choose_output_file_path`</span>
+<span class="sd">        Then, calls :py:func:`~histogram.density_histogram.Blocks.initialize_data`</span>
+<span class="sd">        Finally, outputs data from</span>
+<span class="sd">        :py:func:`~histogram.density_histogram.Blocks.output_blocks`</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">choose_output_file_path</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialize_data</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_blocks</span><span class="p">()</span></div></div>
+
+
+<div class="viewcode-block" id="DPD"><a class="viewcode-back" href="../../index.html#histogram.density_histogram.DPD">[docs]</a><span class="k">class</span> <span class="nc">DPD</span><span class="p">(</span><span class="n">Blocks</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Read input arguments and initialize data types</span>
+<span class="sd">    for one independent simulation.</span>
+<span class="sd">    Then, make associated histograms, plot them if desired,</span>
+<span class="sd">    and output them into desired format.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param kwargs: input arguments</span>
+
+<span class="sd">        :py:attr:`~histograms.density_histogram.region_data_above_threshold` is a nested dictionary</span>
+<span class="sd">            that contains all final information within the histogram</span>
+<span class="sd">            after the gaussian fits of the peak.</span>
+<span class="sd">            The data structure is {i: {j: k: value}}}</span>
+<span class="sd">            where i is pressure, compressibility, or density,</span>
+<span class="sd">            j is low dens or high dens (the different region names),</span>
+<span class="sd">            k is the string &#39;a-b&#39; where a is the cycle number and b is the box type,</span>
+<span class="sd">            and value is the value at i, j, k</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">Blocks</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">figure_number</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># for plotting results with matplotlib</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fraction_peak_maximum_density</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;fraction_peak_maximum_density&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_bins</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;number_of_bins&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">make_plot</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;plot&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;d_units&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">region_names</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;low dens&#39;</span><span class="p">,</span>  <span class="c1"># lower density name</span>
+                             <span class="s1">&#39;high dens&#39;</span><span class="p">)</span>  <span class="c1"># higher density name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">region_data_above_threshold</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;pressure&#39;</span><span class="p">:</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="p">{}</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">region_names</span><span class="p">},</span>
+            <span class="s1">&#39;compressibility&#39;</span><span class="p">:</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="p">{}</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">region_names</span><span class="p">},</span>
+            <span class="s1">&#39;density&#39;</span><span class="p">:</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="p">{}</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">region_names</span><span class="p">}</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">region_data</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;pressure&#39;</span><span class="p">:</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="p">{}</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">region_names</span><span class="p">},</span>
+            <span class="s1">&#39;compressibility&#39;</span><span class="p">:</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="p">{}</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">region_names</span><span class="p">},</span>
+            <span class="s1">&#39;density&#39;</span><span class="p">:</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="p">{}</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">region_names</span><span class="p">}</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">histograms</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;pressure&#39;</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="s1">&#39;compressibility&#39;</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="s1">&#39;density&#39;</span><span class="p">:</span> <span class="p">{}</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gaussian_fit_results</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">region_membership</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">check_arguments</span><span class="p">()</span>
+
+<div class="viewcode-block" id="DPD.check_arguments"><a class="viewcode-back" href="../../index.html#histogram.density_histogram.DPD.check_arguments">[docs]</a>    <span class="k">def</span> <span class="nf">check_arguments</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check if arguments passed in are realistic</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">fraction_peak_maximum_density</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s1">&#39;Why use a density fraction of peak maximum less than 0.5&#39;</span></div>
+
+<div class="viewcode-block" id="DPD.fit_gaussian"><a class="viewcode-back" href="../../index.html#histogram.density_histogram.DPD.fit_gaussian">[docs]</a>    <span class="k">def</span> <span class="nf">fit_gaussian</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bin_means</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Fit gaussian function, :py:func:`~histogram.density_histogram.gaussian`</span>
+
+<span class="sd">        :param bin_means: means of density bins (nodes)</span>
+<span class="sd">        :param values: values at means of density bins</span>
+
+<span class="sd">        .. note:</span>
+<span class="sd">            If less than three indices are above threshold, cannot fit gaussian.</span>
+<span class="sd">            If less than ten indices are above threshold, prints warning</span>
+
+<span class="sd">        The initial guess for the peak height, mean, and standard deviation</span>
+<span class="sd">            of the gaussian are obtained from the maximum of the values</span>
+<span class="sd">            above the threshold,</span>
+<span class="sd">            the mean of the densities above the threshold,</span>
+<span class="sd">            and the standard deviation of the</span>
+<span class="sd">            densities above the threshold, respectively.</span>
+
+<span class="sd">        The minimum value allowed for the peak height, mean, and standard</span>
+<span class="sd">            deviation of the gaussian are 0, the minimum density</span>
+<span class="sd">            above the threshold, and 0, respectively.</span>
+
+<span class="sd">        The maximum value allowed for the peak height and mean</span>
+<span class="sd">            of the gaussian are twice the maximum</span>
+<span class="sd">            of the values above the threshold and the maximum density</span>
+<span class="sd">            above the threshold, respectively.</span>
+<span class="sd">            The standard deviation of the gaussian is not</span>
+<span class="sd">            constrained to a finite maximum threshold.</span>
+
+<span class="sd">        The parameters are fit using :py:func:`curve_fit` with the</span>
+<span class="sd">            analytical jacobian :py:func:`~histogram.density_histogram.J_gaussian`</span>
+<span class="sd">            and the initial guess and bounds listed above.</span>
+
+<span class="sd">        Finally, the bounds for the values according to the fraction of the threshold</span>
+<span class="sd">            are converted into continuous bounds in density.</span>
+
+<span class="sd">        :returns:</span>
+<span class="sd">            - params(list) the gaussian parameters fit</span>
+<span class="sd">            - covariance(list) is the covariance of the gaussian parameters</span>
+<span class="sd">            - min_rho_gauss(float) is the minimum density of the gaussian within the threshold specified</span>
+<span class="sd">            - max_rho_gauss(float) is the minimum density of the gaussian within the threshold specified</span>
+<span class="sd">            - num_indices(int) the number of indices used in the fitting of the gaussian</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">bin_means</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;Not enough indices for gaussian fitting, consider increasing bins&#39;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bin_means</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; Only </span><span class="si">%i</span><span class="s1"> indices used in fitting gaussian &#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bin_means</span><span class="p">)))</span>
+        <span class="c1"># initial guess for a, b, c = peak_height, mean, stdev</span>
+        <span class="n">initial_guess</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">values</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">bin_means</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">i</span><span class="o">*</span><span class="n">j</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">bin_means</span><span class="p">,</span> <span class="n">values</span><span class="p">)))</span>
+        <span class="p">]</span>
+        <span class="c1"># bounds on each variable can help</span>
+        <span class="n">lower_bounds</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">bin_means</span><span class="p">),</span> <span class="mf">0.</span><span class="p">]</span>
+        <span class="n">upper_bounds</span> <span class="o">=</span> <span class="p">[</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">values</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">bin_means</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">]</span>
+        <span class="n">params</span><span class="p">,</span> <span class="n">covariance</span> <span class="o">=</span> <span class="n">curve_fit</span><span class="p">(</span><span class="n">gaussian</span><span class="p">,</span> <span class="n">bin_means</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">p0</span><span class="o">=</span><span class="n">initial_guess</span><span class="p">,</span>
+                                       <span class="n">check_finite</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">jac</span><span class="o">=</span><span class="n">jac_gaussian</span><span class="p">,</span>
+                                       <span class="n">bounds</span><span class="o">=</span><span class="p">[</span><span class="n">lower_bounds</span><span class="p">,</span> <span class="n">upper_bounds</span><span class="p">],</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;trf&#39;</span><span class="p">,</span>
+                                       <span class="o">**</span><span class="p">{</span><span class="s1">&#39;ftol&#39;</span><span class="p">:</span> <span class="mf">1e-12</span><span class="p">,</span> <span class="s1">&#39;xtol&#39;</span><span class="p">:</span> <span class="mf">1e-12</span><span class="p">,</span> <span class="s1">&#39;gtol&#39;</span><span class="p">:</span> <span class="mf">1e-12</span><span class="p">})</span>
+
+        <span class="c1"># quadratic equation to determine minimum within fraction threshold</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span> <span class="o">*</span> <span class="n">params</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">params</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">params</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">params</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fraction_peak_maximum_density</span><span class="p">)</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">min_rho_gauss</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">b</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">b</span> <span class="o">*</span> <span class="n">b</span> <span class="o">-</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">a</span> <span class="o">*</span> <span class="n">c</span><span class="p">))</span> <span class="o">/</span> <span class="mf">2.</span> <span class="o">/</span> <span class="n">a</span>
+        <span class="n">max_rho_gauss</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">b</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">b</span> <span class="o">*</span> <span class="n">b</span> <span class="o">-</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">a</span> <span class="o">*</span> <span class="n">c</span><span class="p">))</span> <span class="o">/</span> <span class="mf">2.</span> <span class="o">/</span> <span class="n">a</span>
+        <span class="k">return</span> <span class="n">params</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">covariance</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">min_rho_gauss</span><span class="p">,</span> <span class="n">max_rho_gauss</span></div>
+
+<div class="viewcode-block" id="DPD.fit_density_peaks"><a class="viewcode-back" href="../../index.html#histogram.density_histogram.DPD.fit_density_peaks">[docs]</a>    <span class="k">def</span> <span class="nf">fit_density_peaks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Fit gaussian to both density peaks. The following procedure is followed</span>
+
+<span class="sd">        1. Convert total box densities for each box type into one single array.</span>
+
+<span class="sd">        2. Calculate the mean density out of all densities observed.</span>
+
+<span class="sd">        3. Partition the densities into two regions--those which</span>
+<span class="sd">            have values lower or higher than this mean value.</span>
+
+<span class="sd">        4. Within each new distribution,</span>
+<span class="sd">            perform a histogram using the number of bins requested</span>
+<span class="sd">            during instantiation. The edges of the histogram</span>
+<span class="sd">            correspond to the number of bins chosen, and the values</span>
+<span class="sd">            are their corresponding probabilities normalized</span>
+<span class="sd">            so that the sum of all probabilities is 1.</span>
+
+<span class="sd">        5. Partition histogram bins into those which have values</span>
+<span class="sd">            above the fractional threshold of the maximum value.</span>
+<span class="sd">            Fit a gaussian function of the probabilities of</span>
+<span class="sd">            observing each density as a function of density.</span>
+
+<span class="sd">        Store the results of the binning for each region in</span>
+<span class="sd">        :py:attr:`~histograms.density_histogram.DPD.histograms`</span>
+<span class="sd">        for use later (plotting, outputting)</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># convert to overall distribution of all box densities and find &quot;middle density&quot;</span>
+        <span class="n">all_box_densities</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">box</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_densities</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">all_box_densities</span> <span class="o">+=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_densities</span><span class="p">[</span><span class="n">box</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="n">all_box_densities</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">all_box_densities</span><span class="p">)</span>
+        <span class="n">middle_density</span> <span class="o">=</span> <span class="n">all_box_densities</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+        <span class="c1"># partition all densities into low and high regions</span>
+        <span class="n">density_vals</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="p">{}</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">region_names</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">box</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_densities</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">cycle</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_densities</span><span class="p">[</span><span class="n">box</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="n">middle_density</span><span class="p">:</span>
+                    <span class="n">region</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">region_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">region</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">region_names</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">-</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cycle</span><span class="p">,</span> <span class="n">box</span><span class="p">)</span>  <span class="c1"># keep box information in data for later</span>
+                <span class="n">density_vals</span><span class="p">[</span><span class="n">region</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="n">histogram_data</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="p">{}</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">region_names</span><span class="p">}</span>
+        <span class="c1"># iterate through each region and do fitting</span>
+        <span class="k">for</span> <span class="n">region</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">region_names</span><span class="p">:</span>
+            <span class="n">values_for_binning</span> <span class="o">=</span> <span class="n">density_vals</span><span class="p">[</span><span class="n">region</span><span class="p">]</span>
+
+            <span class="n">vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">values_for_binning</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+            <span class="n">bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">5.</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">)</span>
+            <span class="n">counts</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">vals</span><span class="p">,</span>
+                                         <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span>
+                                         <span class="n">density</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">total_count</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">counts</span><span class="p">)</span>
+            <span class="c1"># normalize so that sum of all probabilities is 1</span>
+            <span class="n">probabilities</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="o">/</span> <span class="n">total_count</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">counts</span><span class="p">]</span>
+
+            <span class="c1"># nodes are in between edges</span>
+            <span class="n">nodes</span> <span class="o">=</span> <span class="p">[(</span><span class="n">edges</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">edges</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">edges</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)]</span>
+            <span class="n">histogram_data</span><span class="p">[</span><span class="n">region</span><span class="p">][</span><span class="s1">&#39;nodes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[:]</span>
+            <span class="n">histogram_data</span><span class="p">[</span><span class="n">region</span><span class="p">][</span><span class="s1">&#39;vals&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">probabilities</span><span class="p">[:]</span>
+
+            <span class="c1"># find subset of data that is above threshold</span>
+            <span class="n">indices</span><span class="p">,</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">probabilities</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fraction_peak_maximum_density</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">probabilities</span><span class="p">))</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="n">nodes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">]</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="n">probabilities</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">]</span>
+            <span class="n">histogram_data</span><span class="p">[</span><span class="n">region</span><span class="p">][</span><span class="s1">&#39;nodes above threshold&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:]</span>
+            <span class="n">histogram_data</span><span class="p">[</span><span class="n">region</span><span class="p">][</span><span class="s1">&#39;vals above threshold&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span><span class="p">[:]</span>
+
+            <span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">covariance</span><span class="p">,</span> <span class="n">min_gauss</span><span class="p">,</span> <span class="n">max_gauss</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_gaussian</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+            <span class="c1"># find densities, pressures, compressibilities in each region</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">values_for_binning</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">cycle</span><span class="p">,</span> <span class="n">box</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)</span>
+                <span class="n">cycle</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cycle</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">region_data</span><span class="p">[</span><span class="s1">&#39;density&#39;</span><span class="p">][</span><span class="n">region</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">values_for_binning</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">cycle</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pressures</span><span class="p">[</span><span class="n">box</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">region_data</span><span class="p">[</span><span class="s1">&#39;pressure&#39;</span><span class="p">][</span><span class="n">region</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pressures</span><span class="p">[</span><span class="n">box</span><span class="p">][</span><span class="n">cycle</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">cycle</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">compressibilities</span><span class="p">[</span><span class="n">box</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">region_data</span><span class="p">[</span><span class="s1">&#39;compressibility&#39;</span><span class="p">][</span><span class="n">region</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compressibilities</span><span class="p">[</span><span class="n">box</span><span class="p">][</span><span class="n">cycle</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">max_gauss</span> <span class="o">&gt;=</span> <span class="n">values_for_binning</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">min_gauss</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">region_data_above_threshold</span><span class="p">[</span><span class="s1">&#39;density&#39;</span><span class="p">][</span><span class="n">region</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">values_for_binning</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">cycle</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pressures</span><span class="p">[</span><span class="n">box</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">region_data_above_threshold</span><span class="p">[</span><span class="s1">&#39;pressure&#39;</span><span class="p">][</span><span class="n">region</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pressures</span><span class="p">[</span><span class="n">box</span><span class="p">][</span><span class="n">cycle</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">cycle</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">compressibilities</span><span class="p">[</span><span class="n">box</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">region_data_above_threshold</span><span class="p">[</span><span class="s1">&#39;compressibility&#39;</span><span class="p">][</span><span class="n">region</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compressibilities</span><span class="p">[</span><span class="n">box</span><span class="p">][</span><span class="n">cycle</span><span class="p">]</span>
+
+            <span class="n">histogram_data</span><span class="p">[</span><span class="n">region</span><span class="p">][</span><span class="s1">&#39;raw data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">region_data_above_threshold</span><span class="p">[</span><span class="s1">&#39;density&#39;</span><span class="p">][</span><span class="n">region</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+            <span class="c1"># save gaussian fit results</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gaussian_fit_results</span><span class="p">[</span><span class="n">region</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;parameters&#39;</span><span class="p">:</span> <span class="n">params</span><span class="p">,</span>
+                <span class="s1">&#39;covariance&#39;</span><span class="p">:</span> <span class="n">covariance</span><span class="p">,</span>
+                <span class="s1">&#39;min_gauss&#39;</span><span class="p">:</span> <span class="n">min_gauss</span><span class="p">,</span>
+                <span class="s1">&#39;max_gauss&#39;</span><span class="p">:</span> <span class="n">max_gauss</span>
+            <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">histograms</span><span class="p">[</span><span class="s1">&#39;density&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">histogram_data</span></div>
+
+<div class="viewcode-block" id="DPD.histogram_P_Z_data"><a class="viewcode-back" href="../../index.html#histogram.density_histogram.DPD.histogram_P_Z_data">[docs]</a>    <span class="k">def</span> <span class="nf">histogram_P_Z_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">data_type</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Obtain histogram(s) of pressure or compressibility data within region(s) or box(es)</span>
+
+<span class="sd">        :param data:</span>
+<span class="sd">        :type data: dict</span>
+<span class="sd">        :return: results of histograms</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">hist_data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">hist_data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">data_vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+            <span class="k">if</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s1">&#39;P&#39;</span><span class="p">:</span>
+                <span class="n">bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mf">10.</span><span class="o">*</span><span class="mi">1000</span><span class="p">,</span> <span class="mf">10.</span><span class="o">*</span><span class="mi">1000</span><span class="p">,</span> <span class="mf">0.3</span><span class="o">*</span><span class="mi">1000</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s1">&#39;Z&#39;</span><span class="p">:</span>
+                <span class="n">bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">)</span>
+            <span class="n">hist</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">data_vals</span><span class="p">,</span>
+                                       <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span>
+                                       <span class="n">density</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">bin_means</span> <span class="o">=</span> <span class="p">[(</span><span class="n">edges</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">edges</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">edges</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)]</span>
+            <span class="n">total_count</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">hist</span><span class="p">)</span>
+            <span class="n">probabilities</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="o">/</span><span class="n">total_count</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">hist</span><span class="p">]</span>
+            <span class="n">hist_data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;nodes&#39;</span><span class="p">:</span> <span class="n">bin_means</span><span class="p">,</span>
+                <span class="s1">&#39;vals&#39;</span><span class="p">:</span> <span class="n">probabilities</span><span class="p">,</span>
+                <span class="s1">&#39;raw data&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+            <span class="p">}</span>
+        <span class="k">return</span> <span class="n">hist_data</span></div>
+
+<div class="viewcode-block" id="DPD.calculate_P_Z"><a class="viewcode-back" href="../../index.html#histogram.density_histogram.DPD.calculate_P_Z">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_P_Z</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculate pressure and compressibilities for two different types of distributions</span>
+
+<span class="sd">        Store data of mean and standard deviation of raw data values in</span>
+<span class="sd">        :py:attr:`~histograms.density_histogram.DPD.histograms`</span>
+<span class="sd">        within</span>
+<span class="sd">        :py:attr:`~histograms.density_histogram.DPD.data`</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">histograms</span><span class="p">[</span><span class="s1">&#39;pressure above threshold&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">histogram_P_Z_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">region_data_above_threshold</span><span class="p">[</span><span class="s1">&#39;pressure&#39;</span><span class="p">],</span> <span class="s1">&#39;P&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">histograms</span><span class="p">[</span><span class="s1">&#39;compressibility above threshold&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">histogram_P_Z_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">region_data_above_threshold</span><span class="p">[</span><span class="s1">&#39;compressibility&#39;</span><span class="p">],</span> <span class="s1">&#39;Z&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">histograms</span><span class="p">[</span><span class="s1">&#39;pressure&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">histogram_P_Z_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">region_data</span><span class="p">[</span><span class="s1">&#39;pressure&#39;</span><span class="p">],</span> <span class="s1">&#39;P&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">histograms</span><span class="p">[</span><span class="s1">&#39;compressibility&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">histogram_P_Z_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">region_data</span><span class="p">[</span><span class="s1">&#39;compressibility&#39;</span><span class="p">],</span> <span class="s1">&#39;Z&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">store_data</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="DPD.store_data"><a class="viewcode-back" href="../../index.html#histogram.density_histogram.DPD.store_data">[docs]</a>    <span class="k">def</span> <span class="nf">store_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Store data of mean and standard deviation of raw data values in</span>
+<span class="sd">        :py:attr:`~histograms.density_histogram.DPD.histograms`</span>
+<span class="sd">        within</span>
+<span class="sd">        :py:attr:`~histograms.density_histogram.DPD.data`</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">data_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">histograms</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">peak</span><span class="p">,</span> <span class="n">vals</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">histograms</span><span class="p">[</span><span class="n">data_type</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">peak</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">peak</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">vals</span><span class="p">[</span><span class="s1">&#39;raw data&#39;</span><span class="p">])</span>
+                <span class="n">stdev</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">vals</span><span class="p">[</span><span class="s1">&#39;raw data&#39;</span><span class="p">])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">peak</span><span class="p">][</span><span class="n">data_type</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s1">&#39;mean&#39;</span><span class="p">:</span> <span class="n">mean</span><span class="p">,</span>
+                    <span class="s1">&#39;stdev&#39;</span><span class="p">:</span> <span class="n">stdev</span>
+                <span class="p">}</span></div>
+
+<div class="viewcode-block" id="DPD.output_results"><a class="viewcode-back" href="../../index.html#histogram.density_histogram.DPD.output_results">[docs]</a>    <span class="k">def</span> <span class="nf">output_results</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Output information stored in</span>
+<span class="sd">        :py:attr:`~histograms.density_histogram.DPD.data`</span>
+
+<span class="sd">        Change to g/mL units if was desired during instantiation</span>
+
+<span class="sd">        Output results either by printing or saving to csv file,</span>
+<span class="sd">            as requested by input arguments</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unit</span> <span class="o">==</span> <span class="s2">&quot;g/mL&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">[</span><span class="s2">&quot;density&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;g/mL&quot;</span>
+            <span class="n">low_key</span><span class="p">,</span> <span class="n">high_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">region_names</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">high_key</span><span class="p">][</span><span class="s1">&#39;density&#39;</span><span class="p">][</span><span class="s1">&#39;mean&#39;</span><span class="p">]</span> <span class="o">*=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">N_av</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mf">1e-21</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">molecular_weight</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">high_key</span><span class="p">][</span><span class="s1">&#39;density&#39;</span><span class="p">][</span><span class="s1">&#39;stdev&#39;</span><span class="p">]</span> <span class="o">*=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">N_av</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mf">1e-21</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">molecular_weight</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">low_key</span><span class="p">][</span><span class="s1">&#39;density&#39;</span><span class="p">][</span><span class="s1">&#39;mean&#39;</span><span class="p">]</span> <span class="o">*=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">N_av</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mf">1e-21</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">molecular_weight</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">low_key</span><span class="p">][</span><span class="s1">&#39;density&#39;</span><span class="p">][</span><span class="s1">&#39;stdev&#39;</span><span class="p">]</span> <span class="o">*=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">N_av</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mf">1e-21</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">molecular_weight</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_file_name</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">pprint</span>
+            <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_file_name</span> <span class="o">+</span> <span class="s1">&#39;_histogram_averages.csv&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Property,Units,High Density Mean,High Density Standard Deviation,&#39;</span>
+                        <span class="s1">&#39;Low Density Mean,Low Density Standard Deviation</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">low_key</span><span class="p">,</span> <span class="n">high_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">region_names</span>
+                <span class="k">for</span> <span class="nb">property</span> <span class="ow">in</span> <span class="s1">&#39;pressure&#39;</span><span class="p">,</span> <span class="s1">&#39;compressibility&#39;</span><span class="p">,</span> <span class="s1">&#39;density&#39;</span><span class="p">:</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                        <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">,</span><span class="si">%e</span><span class="s1">,</span><span class="si">%e</span><span class="s1">,</span><span class="si">%e</span><span class="s1">,</span><span class="si">%e</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">property</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">[</span><span class="nb">property</span><span class="p">],</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">high_key</span><span class="p">][</span><span class="nb">property</span><span class="p">][</span><span class="s1">&#39;mean&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">high_key</span><span class="p">][</span><span class="nb">property</span><span class="p">][</span><span class="s1">&#39;stdev&#39;</span><span class="p">],</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">low_key</span><span class="p">][</span><span class="nb">property</span><span class="p">][</span><span class="s1">&#39;mean&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">low_key</span><span class="p">][</span><span class="nb">property</span><span class="p">][</span><span class="s1">&#39;stdev&#39;</span><span class="p">]</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_blocks</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_histograms</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_gaussian_fit</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_region_specific_trajectory</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">output_histograms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_path</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">output_file_name</span><span class="o">+</span><span class="s1">&#39;_histograms.json&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">histograms</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">output_gaussian_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_path</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">output_file_name</span><span class="o">+</span><span class="s1">&#39;_gaussian_results.json&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gaussian_fit_results</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">save_region_specific_trajectory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_path</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">output_file_name</span><span class="o">+</span><span class="s1">&#39;_region_data_above_threshold.json&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">region_data_above_threshold</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_path</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">output_file_name</span><span class="o">+</span><span class="s1">&#39;_region_data.json&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">region_data</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">decide_if_two_plots</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="n">means</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">region_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="s1">&#39;parameters&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span>
+                 <span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">region_names</span><span class="p">[</span><span class="mi">1</span><span class="p">]][</span><span class="s1">&#39;parameters&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
+        <span class="k">if</span> <span class="nb">max</span><span class="p">(</span><span class="n">means</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">10.</span> <span class="o">*</span> <span class="nb">min</span><span class="p">(</span><span class="n">means</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_type</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">figure_number</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">figure_number</span><span class="p">)</span>
+        <span class="n">axes</span> <span class="o">=</span> <span class="p">[</span><span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)]</span>
+        <span class="n">two_plots</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s1">&#39;density&#39;</span><span class="p">:</span>
+            <span class="n">two_plots</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decide_if_two_plots</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gaussian_fit_results</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">two_plots</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">figure_number</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">fig2</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">figure_number</span><span class="p">)</span>
+            <span class="n">axes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fig2</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">))</span>
+        <span class="n">colors</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">region_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="p">{</span><span class="s1">&#39;nodes&#39;</span><span class="p">:</span> <span class="s1">&#39;C0&#39;</span><span class="p">,</span> <span class="s1">&#39;fit&#39;</span><span class="p">:</span> <span class="s1">&#39;C1&#39;</span><span class="p">,</span> <span class="s1">&#39;mean&#39;</span><span class="p">:</span> <span class="s1">&#39;C4&#39;</span><span class="p">},</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">region_names</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="p">{</span><span class="s1">&#39;nodes&#39;</span><span class="p">:</span> <span class="s1">&#39;C2&#39;</span><span class="p">,</span> <span class="s1">&#39;fit&#39;</span><span class="p">:</span> <span class="s1">&#39;C3&#39;</span><span class="p">,</span> <span class="s1">&#39;mean&#39;</span><span class="p">:</span> <span class="s1">&#39;C5&#39;</span><span class="p">},</span>
+            <span class="s1">&#39;box 1&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;nodes&#39;</span><span class="p">:</span> <span class="s1">&#39;C6&#39;</span><span class="p">,</span> <span class="s1">&#39;mean&#39;</span><span class="p">:</span> <span class="s1">&#39;C7&#39;</span><span class="p">},</span>
+            <span class="s1">&#39;box 2&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;nodes&#39;</span><span class="p">:</span> <span class="s1">&#39;C8&#39;</span><span class="p">,</span> <span class="s1">&#39;mean&#39;</span><span class="p">:</span> <span class="s1">&#39;C9&#39;</span><span class="p">}</span>
+        <span class="p">}</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">histograms</span><span class="p">[</span><span class="n">data_type</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">axes</span><span class="p">):</span>
+                <span class="n">ax</span> <span class="o">=</span> <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ax</span> <span class="o">=</span> <span class="n">axes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">histograms</span><span class="p">[</span><span class="n">data_type</span><span class="p">][</span><span class="n">key</span><span class="p">]</span>
+            <span class="n">nodes</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="s1">&#39;nodes&#39;</span><span class="p">]</span>
+            <span class="n">vals</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="s1">&#39;vals&#39;</span><span class="p">]</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">vals</span><span class="p">,</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;nodes&#39;</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;nodes, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">key</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s1">&#39;parameters&#39;</span> <span class="ow">in</span> <span class="n">values</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="c1"># density</span>
+                <span class="n">gauss_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="s1">&#39;min_gauss&#39;</span><span class="p">],</span> <span class="n">values</span><span class="p">[</span><span class="s1">&#39;max_gauss&#39;</span><span class="p">])</span>
+                <span class="n">gauss_y</span> <span class="o">=</span> <span class="n">gaussian</span><span class="p">(</span><span class="n">gauss_x</span><span class="p">,</span> <span class="o">*</span><span class="n">values</span><span class="p">[</span><span class="s1">&#39;parameters&#39;</span><span class="p">])</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">gauss_x</span><span class="p">,</span> <span class="n">gauss_y</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s1">&#39;solid&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;fit&#39;</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;fit, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">key</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># pressure, compressibility</span>
+                <span class="n">mean_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="s1">&#39;raw data&#39;</span><span class="p">])</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">mean_value</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">vals</span><span class="p">),</span> <span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;nodes&#39;</span><span class="p">],</span>
+                        <span class="n">label</span><span class="o">=</span><span class="s1">&#39;mean, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">data_type</span> <span class="o">+</span> <span class="s1">&#39; all&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">histograms</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">prob_distribution_and_fit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">histograms</span><span class="p">[</span><span class="n">data_type</span> <span class="o">+</span> <span class="s1">&#39; all&#39;</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">prob_distribution_and_fit</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                <span class="n">values</span> <span class="o">=</span> <span class="n">prob_distribution_and_fit</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                <span class="n">nodes</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="s1">&#39;nodes&#39;</span><span class="p">]</span>
+                <span class="n">vals</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="s1">&#39;vals&#39;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">axes</span><span class="p">):</span>
+                    <span class="n">ax</span> <span class="o">=</span> <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">ax</span> <span class="o">=</span> <span class="n">axes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">vals</span><span class="p">,</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;nodes&#39;</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;nodes, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">key</span><span class="p">)</span>
+                <span class="n">mean_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="s1">&#39;raw data&#39;</span><span class="p">])</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">mean_value</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">vals</span><span class="p">),</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;nodes&#39;</span><span class="p">],</span>
+                        <span class="n">label</span><span class="o">=</span><span class="s1">&#39;mean, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">key</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axes</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Probability&#39;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">data_type</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_file_name</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">two_plots</span><span class="p">:</span>
+                <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_file_name</span> <span class="o">+</span> <span class="s1">&#39;_1_&#39;</span> <span class="o">+</span> <span class="n">data_type</span> <span class="o">+</span> <span class="s1">&#39;.png&#39;</span><span class="p">)</span>
+                <span class="n">fig2</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_file_name</span> <span class="o">+</span> <span class="s1">&#39;_2_&#39;</span> <span class="o">+</span> <span class="n">data_type</span> <span class="o">+</span> <span class="s1">&#39;.png&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_file_name</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="n">data_type</span> <span class="o">+</span> <span class="s1">&#39;.png&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">two_plots</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fig2</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DPD.main"><a class="viewcode-back" href="../../index.html#histogram.density_histogram.DPD.main">[docs]</a>    <span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Main method of :class:</span>
+<span class="sd">        First, calls :py:func:`~histogram.density_histogram.DPD.choose_output_file_path`</span>
+<span class="sd">        Then, calls :py:func:`~histogram.density_histogram.DPD.initialize_data`</span>
+<span class="sd">        The peaks are fit using</span>
+<span class="sd">        :py:func:`~histogram.density_histogram.DPD.fit_density_peaks`</span>
+<span class="sd">        and the corresponding pressure and compressibilities are obtained from</span>
+<span class="sd">        :py:func:`~histogram.density_histogram.DPD.calculate_P_Z`</span>
+<span class="sd">        and then plot results if :py:attr:`~histogram.density_histogram.DPD.make_plot` == &#39;Yes&#39;</span>
+<span class="sd">        and then output results with</span>
+<span class="sd">        :py:func:`~hisogram.density_histogram.DPD.output_results`</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">choose_output_file_path</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialize_data</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fit_density_peaks</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calculate_P_Z</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_plot</span> <span class="o">==</span> <span class="s1">&#39;Yes&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="s1">&#39;pressure&#39;</span><span class="p">,</span> <span class="s1">&#39;compressibility&#39;</span><span class="p">,</span> <span class="s1">&#39;density&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_results</span><span class="p">()</span></div></div>
+
+
+<div class="viewcode-block" id="parse_arguments"><a class="viewcode-back" href="../../index.html#histogram.density_histogram.parse_arguments">[docs]</a><span class="k">def</span> <span class="nf">parse_arguments</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Command-line parser for input data</span>
+
+<span class="sd">    :return: arguments to pass to either :py:class:`Blocks` or :py:class:`DPD` during instantiation</span>
+<span class="sd">    :rtype: dict</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">argparse</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s1">&#39;Read trajectory file(s). Calculate densities&#39;</span>
+                                                 <span class="s1">&#39; of two different boxes using the histogram (gaussian) approach.&#39;</span>
+                                                 <span class="s1">&#39; Calculate vapor pressure (and compressibility factor) using data&#39;</span>
+                                                 <span class="s1">&#39; for the high-density box and low-density box&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-fi&#39;</span><span class="p">,</span> <span class="s1">&#39;--files&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;list of trajectory files for ONE independent simulation&#39;</span><span class="p">,</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-fd&#39;</span><span class="p">,</span> <span class="s1">&#39;--fraction_peak_maximum_density&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Fraction of peak maximum to consider in gaussian fitting of densities&#39;</span>
+                             <span class="s1">&#39;(defaults to 0.75; see J. Chem. Phys. 143, 114113 (2015) for recommendations)&#39;</span><span class="p">,</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mf">0.75</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-n&#39;</span><span class="p">,</span> <span class="s1">&#39;--number_of_bins&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Number of bins within 2 stdevs of each density peak&#39;</span>
+                                                       <span class="s1">&#39;(defaults to 100)&#39;</span><span class="p">,</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-T&#39;</span><span class="p">,</span> <span class="s1">&#39;--temperature&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Temperature of simulation [ Kelvin units ]&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-o&#39;</span><span class="p">,</span> <span class="s1">&#39;--output_file_name&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Name of output file (optional, used for results file and plot)&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="s1">&#39;output&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-p&#39;</span><span class="p">,</span> <span class="s1">&#39;--plot&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;whether to plot results&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+                        <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Yes&#39;</span><span class="p">,</span> <span class="s1">&#39;No&#39;</span><span class="p">],</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;No&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-b&#39;</span><span class="p">,</span> <span class="s1">&#39;--blocks_only&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;whether or not to only do block averages only&#39;</span><span class="p">,</span>
+                        <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Yes&#39;</span><span class="p">,</span> <span class="s1">&#39;No&#39;</span><span class="p">],</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;No&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-u&#39;</span><span class="p">,</span> <span class="s1">&#39;--d_units&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Choice for density units&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+                        <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;chains/nm**3&#39;</span><span class="p">,</span> <span class="s1">&#39;g/mL&#39;</span><span class="p">],</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;chains/nm**3&#39;</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="nb">vars</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">args</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Robert F. DeJaco
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
