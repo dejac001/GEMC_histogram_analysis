@@ -228,7 +228,7 @@ class Blocks:
             if '/' in file:
                 path = file[:file.rfind('/')] + '/'
             else:
-                path = '.'
+                path = './'
             if path not in fort_12_paths:
                 fort_12_paths.append(path)
         if len(fort_12_paths) == 1:
