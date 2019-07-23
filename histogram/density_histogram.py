@@ -630,10 +630,10 @@ class DPD(Blocks):
                 f.write('Property,Units,High Density Mean,High Density Standard Deviation,'
                         'Low Density Mean,Low Density Standard Deviation\n')
                 low_key, high_key = self.region_names
-                for property in 'pressure', 'compressibility', 'density':
+                for property in 'pressure above threshold', 'compressibility above threshold', 'density':
                     f.write(
                         '%s,%s,%e,%e,%e,%e\n' % (
-                            property, self.units[property],
+                            property, self.units[property.split()[0]],
                             self.data[high_key][property]['mean'], self.data[high_key][property]['stdev'],
                             self.data[low_key][property]['mean'], self.data[low_key][property]['stdev']
                         )
