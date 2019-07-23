@@ -488,9 +488,8 @@ class DPD(Blocks):
             values_for_binning = density_vals[region]
 
             vals = np.array(list(values_for_binning.values()))
-            bins = np.arange(0., 5., 0.02)
             counts, edges = np.histogram(vals,
-                                         bins=bins,
+                                         bins=self.number_of_bins,
                                          density=False)
             total_count = sum(counts)
             # normalize so that sum of all probabilities is 1
@@ -537,7 +536,7 @@ class DPD(Blocks):
             }
         self.histograms['density'] = histogram_data
 
-    def histogram_P_Z_data(self, data, data_type):
+    def histogram_P_Z_data(self, data):
         """Obtain histogram(s) of pressure or compressibility data within region(s) or box(es)
 
         :param data:
@@ -549,12 +548,8 @@ class DPD(Blocks):
         for key in data.keys():
             hist_data[key] = {}
             data_vals = np.array(list(data[key].values()))
-            if data_type == 'P':
-                bins = np.arange(-10.*1000, 10.*1000, 0.3*1000)
-            elif data_type == 'Z':
-                bins = np.arange(-1., 2., 0.05)
             hist, edges = np.histogram(data_vals,
-                                       bins=bins,
+                                       bins=self.number_of_bins,
                                        density=False)
             bin_means = [(edges[i] + edges[i + 1]) / 2 for i in range(len(edges) - 1)]
             total_count = sum(hist)
@@ -576,10 +571,10 @@ class DPD(Blocks):
 
         :return: None
         """
-        self.histograms['pressure above threshold'] = self.histogram_P_Z_data(self.region_data_above_threshold['pressure'], 'P')
-        self.histograms['compressibility above threshold'] = self.histogram_P_Z_data(self.region_data_above_threshold['compressibility'], 'Z')
-        self.histograms['pressure'] = self.histogram_P_Z_data(self.region_data['pressure'], 'P')
-        self.histograms['compressibility'] = self.histogram_P_Z_data(self.region_data['compressibility'], 'Z')
+        self.histograms['pressure above threshold'] = self.histogram_P_Z_data(self.region_data_above_threshold['pressure'])
+        self.histograms['compressibility above threshold'] = self.histogram_P_Z_data(self.region_data_above_threshold['compressibility'])
+        self.histograms['pressure'] = self.histogram_P_Z_data(self.region_data['pressure'])
+        self.histograms['compressibility'] = self.histogram_P_Z_data(self.region_data['compressibility'])
         self.store_data()
 
     def store_data(self):
